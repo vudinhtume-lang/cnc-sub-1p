@@ -76,7 +76,7 @@
       window._usersUnsubscribe = null;
     }
     function profileToMember(uid, data) {
-      return { id: uid, uid, username: data.username || '', name: data.displayName || '', role: data.role || 'MANAGER', title: data.title || '', status: data.status || 'ACTIVE', isManager: uid === ADMIN_UID && data.role === 'ADMIN' };
+      return { id: uid, uid, username: data.username || '', name: data.displayName || '', role: data.role || 'MANAGER', title: data.title || '', status: data.status || 'ACTIVE', isManager: uid === ADMIN_UID };
     }
     async function loadProfile(user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
