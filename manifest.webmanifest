@@ -1,0 +1,11 @@
+{
+  "name": "CNC SUB 1P - Task Management",
+  "short_name": "CNC SUB 1P",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f4f6",
+  "theme_color": "#1d4ed8",
+  "description": "Quản lý công việc CNC SUB 1P"
+}
