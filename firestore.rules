@@ -1,32 +1,55 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function isAdmin() {
-      return signedIn() && request.auth.uid == "Iy2xpQNDfGS5LYdM15shqELoGWz2";
+    function signedIn() {
+      return request.auth != null;
     }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.uid == "Iy2xpQNDfGS5LYdM15shqELoGWz2";
+    }
+
+    function isActiveUser() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ACTIVE';
+    }
+
     function validTaskStatus() {
       return request.resource.data.status in ['todo', 'in_progress', 'done'];
     }
 
     match /users/{userId} {
-      allow get: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow get: if signedIn()
+        && (request.auth.uid == userId || isAdmin());
       allow list: if isAdmin();
+
       allow create, update: if isAdmin()
-        && (request.resource.data.role != 'ADMIN' || userId == "Iy2xpQNDfGS5LYdM15shqELoGWz2");
-      allow delete: if isAdmin() && userId != "Iy2xpQNDfGS5LYdM15shqELoGWz2";
+        && (
+          request.resource.data.role != 'ADMIN'
+          || userId == "Iy2xpQNDfGS5LYdM15shqELoGWz2"
+        );
+
+      allow delete: if isAdmin()
+        && userId != "Iy2xpQNDfGS5LYdM15shqELoGWz2";
     }
 
     match /tasks/{taskId} {
-      allow read: if signedIn();
+      allow read: if isActiveUser();
       allow create, delete: if isAdmin();
+
       allow update: if isAdmin() || (
-        signedIn()
+        isActiveUser()
         && resource.data.assigneeId == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['status', 'acknowledged', 'acknowledgedAt'])
+          .hasOnly(['status', 'acknowledged', 'acknowledgedAt'])
         && validTaskStatus()
-        && (!('acknowledged' in request.resource.data.diff(resource.data).affectedKeys()) || request.resource.data.acknowledged == true)
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['acknowledged'])
+          || request.resource.data.acknowledged == true
+        )
       );
     }
 
