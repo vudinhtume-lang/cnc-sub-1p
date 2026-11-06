@@ -1259,25 +1259,28 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
       const settingsRole = document.getElementById('settings-current-role');
 
       if (window.loggedInUser) {
-        if (window.loggedInUser.isManager) {
-          roleSubtitle.innerText = 'Góc nhìn: Quản lý Tổng';
-          badgeText.innerText = 'QL Tổng';
-          dashRoleTag.innerText = 'Quản lý Tổng';
-        } else {
-          roleSubtitle.innerText = `Góc nhìn: ${window.loggedInUser.name}`;
-          badgeText.innerText = window.loggedInUser.name;
-          dashRoleTag.innerText = 'Quản lý Cấp dưới';
-        }
-        dashGreeting.innerText = `Xin chào, ${window.loggedInUser.name}!`;
-        settingsRole.innerText = window.loggedInUser.name;
-      } else {
-        roleSubtitle.innerText = 'Góc nhìn: Khách (Xem)';
-        badgeText.innerText = 'Đăng nhập';
-        dashRoleTag.innerText = 'Tài khoản Khách';
-        dashGreeting.innerText = 'Xin chào!';
-        settingsRole.innerText = 'Khách (Chưa đăng nhập)';
-      }
+  const member = window.loggedInUser;
 
+  const roleLabel = member.isManager
+    ? 'ADMIN · Quản trị hệ thống'
+    : member.role === 'MANAGER'
+      ? 'MANAGER · Quản lý'
+      : 'USER · Nhân viên';
+
+  roleSubtitle.innerText = `Quyền: ${roleLabel}`;
+  badgeText.innerText = roleLabel;
+  dashRoleTag.innerText = roleLabel;
+
+  dashGreeting.innerText = `Xin chào, ${member.name}!`;
+  settingsRole.innerText = `${member.name} · ${roleLabel}`;
+
+} else {
+  roleSubtitle.innerText = 'Góc nhìn: Khách (Xem)';
+  badgeText.innerText = 'Đăng nhập';
+  dashRoleTag.innerText = 'Tài khoản Khách';
+  dashGreeting.innerText = 'Xin chào!';
+  settingsRole.innerText = 'Khách (Chưa đăng nhập)';
+      }
       const currentDateText = document.getElementById('current-date-text');
       if (currentDateText) {
         const d = new Date();
