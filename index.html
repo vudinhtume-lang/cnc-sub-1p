@@ -93,38 +93,107 @@
       if (data.role === 'ADMIN' && user.uid !== ADMIN_UID) throw new Error('Tài khoản không được phép có quyền ADMIN.');
       return profileToMember(user.uid, data);
     }
-    function startDataListeners(member) {
-      stopListeners();
-      window._cloudSnapshotInitialized = false;
-      window._knownCloudTasks = new Map();
-      window._taskUnsubscribe = onSnapshot(collection(db, 'tasks'), (snapshot) => {
-        const rows = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (window.handleCloudTasksSnapshot) window.handleCloudTasksSnapshot(rows);
-        if (window.renderAll) window.renderAll();
-        if (window.checkUnacknowledgedTasks) window.checkUnacknowledgedTasks();
-      }, (error) => {
-        console.error('Tasks listener:', error);
-        window.showToast?.('Không đọc được dữ liệu công việc: ' + error.message, 'warning');
-      });
-      if (member.isManager) {
-        window._usersUnsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
-          window.managedUsers = snapshot.docs.map(d => profileToMember(d.id, d.data()));
-          window.members = window.managedUsers.filter(m => m.status === 'ACTIVE');
-          renderManagedUsers();
-          if (window.renderAll) window.renderAll();
-        }, (error) => {
-          console.error('Users listener:', error);
-          window.showToast?.('Không tải được danh sách tài khoản: ' + error.message, 'warning');
-        });
-      } else {
-        window.members = [member];
+    
+function startDataListeners(member) {
+  stopListeners();
+
+  window._cloudSnapshotInitialized = false;
+  window._knownCloudTasks = new Map();
+  window._taskSnapshotSources = new Map();
+  window._taskUnsubscribers = [];
+
+  function listenTasks(taskQuery, source) {
+    const unsubscribe = onSnapshot(taskQuery, (snapshot) => {
+      const rows = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      window.handleCloudTasksSnapshot(rows, source);
+
+      if (window.renderAll) window.renderAll();
+      if (window.checkUnacknowledgedTasks) {
+        window.checkUnacknowledgedTasks();
       }
-      window.isCloudRealtimeActive = true;
-      const badge = document.getElementById('cloud-status-badge');
-      if (badge) badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Realtime Live';
-      const state = document.getElementById('firebase-config-state');
-      if (state) state.textContent = 'Đã kết nối Firebase';
-    }
+    }, (error) => {
+      console.error('Tasks listener:', error);
+      window.showToast?.(
+        'Không đọc được công việc: ' + error.message,
+        'warning'
+      );
+    });
+
+    window._taskUnsubscribers.push(unsubscribe);
+  }
+
+  if (member.isManager) {
+    listenTasks(collection(db, 'tasks'), 'admin-all');
+
+    window._usersUnsubscribe = onSnapshot(
+      collection(db, 'users'),
+      (snapshot) => {
+        window.managedUsers = snapshot.docs.map(
+          d => profileToMember(d.id, d.data())
+        );
+
+        window.members = window.managedUsers.filter(
+          m => m.status === 'ACTIVE'
+        );
+
+        renderManagedUsers();
+        if (window.renderAll) window.renderAll();
+      },
+      (error) => {
+        console.error('Users listener:', error);
+        window.showToast?.(
+          'Không tải được danh sách tài khoản: ' + error.message,
+          'warning'
+        );
+      }
+    );
+
+  } else if (member.role === 'MANAGER') {
+    listenTasks(
+      query(
+        collection(db, 'tasks'),
+        where('assigneeId', '==', member.uid)
+      ),
+      'manager-assigned'
+    );
+
+    listenTasks(
+      query(
+        collection(db, 'tasks'),
+        where('createdBy', '==', member.uid)
+      ),
+      'manager-created'
+    );
+
+    window.members = [member];
+
+  } else {
+    listenTasks(
+      query(
+        collection(db, 'tasks'),
+        where('assigneeId', '==', member.uid)
+      ),
+      'user-assigned'
+    );
+
+    window.members = [member];
+  }
+
+  window.isCloudRealtimeActive = true;
+
+  const badge = document.getElementById('cloud-status-badge');
+  if (badge) {
+    badge.innerHTML =
+      '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Realtime Live';
+  }
+
+  const state = document.getElementById('firebase-config-state');
+  if (state) state.textContent = 'Đã kết nối Firebase';
+}
 
     window.cncSignIn = async (managerName, password) => {
       const email = emailFromManagerName(managerName);
