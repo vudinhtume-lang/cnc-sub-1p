@@ -360,7 +360,7 @@ function renderManagedUsers() {
     </div>
   `).join('');
 }
-
+window.renderManagedUsers = renderManagedUsers;
     window.cncCreateManager = async (name, password, title = '') => {
       if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) throw new Error('Chỉ Admin mới được cấp tài khoản.');
       const displayName = String(name || '').trim().replace(/\s+/g, ' ');
