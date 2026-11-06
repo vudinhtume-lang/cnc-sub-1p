@@ -917,26 +917,66 @@ const managerUid = choiceNumber === 0
     }
 
     window.handleCloudTasksSnapshot = function(cloudTasks) {
-      const previous = window._knownCloudTasks;
-      if (window._cloudSnapshotInitialized && window.loggedInUser) {
-        cloudTasks.forEach(task => {
-          const old = previous.get(String(task.id));
-          if (!old && task.assigneeId === window.loggedInUser.id && !task.acknowledged) {
-            const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'}`;
-            window.showToast(msg, 'info'); safeNotify('CNC SUB 1P - Có nhiệm vụ mới', msg);
-          }
-          if (old && !old.acknowledged && task.acknowledged && window.loggedInUser.isManager) {
-            const member = window.members.find(m => m.id === task.assigneeId);
-            const msg = `${member ? member.name : 'Quản lý'} đã xác nhận nhận: ${task.title}`;
-            window.showToast(msg, 'success'); safeNotify('CNC SUB 1P - Đã tiếp nhận', msg);
-          }
-        });
+    
+window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
+  if (!window._taskSnapshotSources) {
+    window._taskSnapshotSources = new Map();
+  }
+
+  const previous = window._knownCloudTasks || new Map();
+
+  window._taskSnapshotSources.set(
+    source,
+    new Map(cloudTasks.map(t => [String(t.id), t]))
+  );
+
+  const merged = new Map();
+
+  window._taskSnapshotSources.forEach(sourceTasks => {
+    sourceTasks.forEach((task, id) => {
+      merged.set(id, task);
+    });
+  });
+
+  const allTasks = Array.from(merged.values());
+
+  if (window._cloudSnapshotInitialized && window.loggedInUser) {
+    allTasks.forEach(task => {
+      const old = previous.get(String(task.id));
+
+      if (
+        !old &&
+        task.assigneeId === window.loggedInUser.id &&
+        !task.acknowledged
+      ) {
+        const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'}`;
+        window.showToast(msg, 'info');
+        safeNotify('CNC SUB 1P - Có nhiệm vụ mới', msg);
       }
-      window._knownCloudTasks = new Map(cloudTasks.map(t => [String(t.id), t]));
-      window._cloudSnapshotInitialized = true;
-      window.tasks = cloudTasks;
-      if (window.checkUnacknowledgedTasks) window.checkUnacknowledgedTasks();
-    };
+
+      if (
+        old &&
+        !old.acknowledged &&
+        task.acknowledged &&
+        window.loggedInUser.isManager
+      ) {
+        const member = window.members.find(m => m.id === task.assigneeId);
+        const msg = `${member ? member.name : 'Quản lý'} đã xác nhận nhận: ${task.title}`;
+        window.showToast(msg, 'success');
+        safeNotify('CNC SUB 1P - Đã tiếp nhận', msg);
+      }
+    });
+  }
+
+  window._knownCloudTasks = merged;
+  window._cloudSnapshotInitialized = true;
+  window.tasks = allTasks;
+
+  if (window.checkUnacknowledgedTasks) {
+    window.checkUnacknowledgedTasks();
+  }
+};
+
 
     window.saveZaloGroupLink = function() {
       const link = document.getElementById('zalo-group-link-input').value.trim();
