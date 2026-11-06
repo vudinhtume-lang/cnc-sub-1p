@@ -244,24 +244,38 @@
 const managerOptions = (window.managedUsers || [])
   .filter(u => u.uid !== uid && u.role === 'MANAGER' && u.status === 'ACTIVE');
 
-const managerList = managerOptions
-  .map(u => `${u.uid} = ${u.name}`)
-  .join('\n');
-
-const managerUid = prompt(
-  'Nhập UID quản lý trực tiếp:\n' +
-  'Để trống nếu nhân sự thuộc Admin.\n\n' +
-  managerList,
-  target.managerUid || ''
+const currentIndex = managerOptions.findIndex(
+  u => u.uid === target.managerUid
 );
 
-if (managerUid === null) return;
+const managerList = [
+  '0. Thuộc Admin',
+  ...managerOptions.map((u, i) => `${i + 1}. ${u.name}`)
+].join('\n');
+
+const managerChoice = prompt(
+  'CHỌN QUẢN LÝ TRỰC TIẾP\n\n' +
+  managerList +
+  '\n\nNhập số lựa chọn:',
+  currentIndex >= 0 ? String(currentIndex + 1) : '0'
+);
+
+if (managerChoice === null) return;
+
+const choice = managerChoice.trim();
+const choiceNumber = Number(choice);
 
 if (
-  managerUid.trim() !== '' &&
-  !managerOptions.some(u => u.uid === managerUid.trim())
+  !/^\d+$/.test(choice) ||
+  choiceNumber < 0 ||
+  choiceNumber > managerOptions.length
 ) {
-  return window.showToast('UID quản lý không hợp lệ.', 'warning');
+  return window.showToast('Số lựa chọn không hợp lệ.', 'warning');
+}
+
+const managerUid = choiceNumber === 0
+  ? ''
+  : managerOptions[choiceNumber - 1].uid;
 }
       const role = prompt('Nhập quyền MANAGER hoặc USER:', target.role);
       if (role === null) return;
