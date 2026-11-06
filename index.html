@@ -1438,7 +1438,29 @@ const memberStats = subMembers.map(m => {
                   ${s.overdue > 0 ? `<span class="text-[9px] bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded font-bold">${s.overdue} Trễ</span>` : ''}
                   ${s.unack > 0 ? `<span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.2 rounded font-bold">Chờ nhận</span>` : ''}
                 </div>
-                <p class="text-[10px] text-gray-500">${s.done}/${s.total} xong (${percent}%)</p>
+               
+<div class="grid grid-cols-4 gap-1 mt-1.5 text-center">
+  <div class="rounded bg-amber-50 dark:bg-amber-950/30 py-1">
+    <p class="text-[10px] font-bold text-amber-600">${s.todo}</p>
+    <p class="text-[8px] text-gray-500">Chưa làm</p>
+  </div>
+  <div class="rounded bg-indigo-50 dark:bg-indigo-950/30 py-1">
+    <p class="text-[10px] font-bold text-indigo-600">${s.inProgress}</p>
+    <p class="text-[8px] text-gray-500">Đang làm</p>
+  </div>
+  <div class="rounded bg-emerald-50 dark:bg-emerald-950/30 py-1">
+    <p class="text-[10px] font-bold text-emerald-600">${s.done}</p>
+    <p class="text-[8px] text-gray-500">Hoàn thành</p>
+  </div>
+  <div class="rounded bg-rose-50 dark:bg-rose-950/30 py-1">
+    <p class="text-[10px] font-bold text-rose-600">${s.overdue}</p>
+    <p class="text-[8px] text-gray-500">Quá hạn</p>
+  </div>
+</div>
+<p class="text-[9px] text-gray-500 mt-1">
+  Tổng ${s.total} việc · Hoàn thành ${percent}%
+</p>
+
               </div>
             </div>
             <div class="w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
