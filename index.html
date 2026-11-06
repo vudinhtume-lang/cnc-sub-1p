@@ -1337,8 +1337,8 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
 
       membersListEl.innerHTML = memberStats.map(s => {
         const percent = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
-        return `
-          <div class="p-2.5 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50 dark:bg-gray-700/30 flex items-center justify-between">
+        return `<div onclick="openMemberTasks('${s.member.id}')"
+     class="p-2.5 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50 dark:bg-gray-700/30 flex items-center justify-between cursor-pointer hover:border-brand-500 active:scale-[0.99] transition">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
                 ${s.member.name.charAt(0)}
