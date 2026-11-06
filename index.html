@@ -1673,7 +1673,6 @@ const managerUid = choiceNumber === 0
     window.onload = function() {
       window.renderAll();
       window.checkUnacknowledgedTasks();
-      if (!window.loggedInUser) window.openRoleModal();
       updateNotificationPermissionLabel();
       const zaloInput = document.getElementById('zalo-group-link-input');
       if (zaloInput) zaloInput.value = localStorage.getItem('cnc_zalo_group_link') || '';
