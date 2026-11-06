@@ -1397,17 +1397,30 @@ window.openMemberTasks = function(memberId) {
   !m.isManager &&
   (!window.loggedInUser || m.id !== window.loggedInUser.id)
 );
-      const memberStats = subMembers.map(m => {
-        const mTasks = window.tasks.filter(t => t.assigneeId === m.id);
-        const mOverdue = mTasks.filter(t => isOverdue(t)).length;
-        const mInProgress = mTasks.filter(t => t.status === 'in_progress').length;
-        const mDone = mTasks.filter(t => t.status === 'done').length;
-        const mTotal = mTasks.length;
-        const mUnack = mTasks.filter(t => !t.acknowledged && t.status !== 'done').length;
+      
+const memberStats = subMembers.map(m => {
+  const mTasks = window.tasks.filter(t => t.assigneeId === m.id);
 
-        const riskScore = (mOverdue * 10) + (mInProgress * 3) + (mUnack * 5);
-        return { member: m, total: mTotal, done: mDone, overdue: mOverdue, inProgress: mInProgress, unack: mUnack, riskScore };
-      });
+  const mTodo = mTasks.filter(t => t.status === 'todo').length;
+  const mInProgress = mTasks.filter(t => t.status === 'in_progress').length;
+  const mDone = mTasks.filter(t => t.status === 'done').length;
+  const mOverdue = mTasks.filter(t => isOverdue(t)).length;
+  const mTotal = mTasks.length;
+  const mUnack = mTasks.filter(t => !t.acknowledged && t.status !== 'done').length;
+
+  const riskScore = (mOverdue * 10) + (mInProgress * 3) + (mUnack * 5);
+
+  return {
+    member: m,
+    total: mTotal,
+    todo: mTodo,
+    inProgress: mInProgress,
+    done: mDone,
+    overdue: mOverdue,
+    unack: mUnack,
+    riskScore
+  };
+});
 
       memberStats.sort((a, b) => b.riskScore - a.riskScore);
 
