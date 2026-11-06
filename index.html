@@ -826,6 +826,35 @@ const managerUid = choiceNumber === 0
             <p class="text-xs font-semibold">Danh sách tài khoản</p>
             <span id="managed-users-count" class="text-[10px] text-gray-500">0 tài khoản</span>
           </div>
+          
+<div class="space-y-2 mb-3">
+  <input
+    id="managed-users-search"
+    type="text"
+    placeholder="Tìm theo họ tên hoặc tên đăng nhập..."
+    oninput="renderManagedUsers()"
+    class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-xs dark:text-white"
+  >
+
+  <div class="grid grid-cols-2 gap-2">
+    <select id="managed-users-role"
+      onchange="renderManagedUsers()"
+      class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-2 py-2 text-xs dark:text-white">
+      <option value="all">Tất cả quyền</option>
+      <option value="MANAGER">Quản lý</option>
+      <option value="USER">Nhân viên</option>
+    </select>
+
+    <select id="managed-users-status"
+      onchange="renderManagedUsers()"
+      class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-2 py-2 text-xs dark:text-white">
+      <option value="all">Tất cả trạng thái</option>
+      <option value="ACTIVE">Đang hoạt động</option>
+      <option value="DISABLED">Đã khóa</option>
+    </select>
+  </div>
+</div>
+
           <div id="managed-users-list" class="space-y-2">
             <p class="text-[11px] text-gray-500">Đang tải danh sách...</p>
           </div>
