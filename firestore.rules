@@ -25,7 +25,7 @@ service cloud.firestore {
         && (request.auth.uid == userId || isAdmin());
       allow list: if isAdmin()
   || (
-    isActiveUser()
+    signedIn()
     && resource.data.managerUid == request.auth.uid
   );
 
