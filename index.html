@@ -1489,6 +1489,7 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
       } else {
         targetTask = {
           id: 'task-' + Date.now(),
+          createdBy: window.loggedInUser.uid,
           title,
           assigneeId,
           assigneeName: window.members.find(m => m.id === assigneeId)?.name || '',
