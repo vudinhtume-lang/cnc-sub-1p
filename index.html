@@ -227,7 +227,42 @@
         window.showToast('Không cập nhật được: ' + error.message, 'warning');
       }
     };
+    window.editManagedUser = async (uid) => {
+      if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) {
+        return window.showToast('Chỉ Admin mới được thao tác.', 'warning');
+      }
 
+      const target = (window.managedUsers || []).find(u => u.uid === uid);
+      if (!target || uid === ADMIN_UID) return;
+
+      const name = prompt('Họ và tên:', target.name);
+      if (name === null) return;
+      if (!name.trim()) return window.showToast('Họ tên không được để trống.', 'warning');
+
+      const title = prompt('Chức danh / Tổ:', target.title || '');
+      if (title === null) return;
+
+      const role = prompt('Nhập quyền MANAGER hoặc USER:', target.role);
+      if (role === null) return;
+
+      const newRole = role.trim().toUpperCase();
+      if (!['MANAGER', 'USER'].includes(newRole)) {
+        return window.showToast('Chỉ được chọn MANAGER hoặc USER.', 'warning');
+      }
+
+      try {
+        await updateDoc(doc(db, 'users', uid), {
+          displayName: name.trim(),
+          title: title.trim(),
+          role: newRole,
+          updatedAt: new Date().toISOString(),
+          updatedBy: ADMIN_UID
+        });
+        window.showToast('Đã cập nhật thông tin nhân sự.', 'success');
+      } catch (error) {
+        window.showToast('Không cập nhật được: ' + error.message, 'warning');
+      }
+    };
 
     window.cncSignOut = async () => { await signOut(auth); };
     window.cncChangePassword = async (oldPass, newPass) => {
