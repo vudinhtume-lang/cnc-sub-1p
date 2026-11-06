@@ -70,10 +70,17 @@
       return `${normalizeName(name)}@cnc-sub-1p.invalid`;
     }
     function stopListeners() {
-      if (window._taskUnsubscribe) window._taskUnsubscribe();
-      if (window._usersUnsubscribe) window._usersUnsubscribe();
-      window._taskUnsubscribe = null;
-      window._usersUnsubscribe = null;
+  (window._taskUnsubscribers || []).forEach(unsubscribe => {
+    if (unsubscribe) unsubscribe();
+  });
+
+  window._taskUnsubscribers = [];
+
+  if (window._taskUnsubscribe) window._taskUnsubscribe();
+  if (window._usersUnsubscribe) window._usersUnsubscribe();
+
+  window._taskUnsubscribe = null;
+  window._usersUnsubscribe = null;
     }
     function profileToMember(uid, data) {
       return { id: uid, uid, username: data.username || '', name: data.displayName || '', role: data.role || 'MANAGER', title: data.title || '', status: data.status || 'ACTIVE', managerUid: data.managerUid || '', isManager: uid === ADMIN_UID };
