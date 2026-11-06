@@ -152,24 +152,52 @@ function startDataListeners(member) {
       }
     );
 
-  } else if (member.role === 'MANAGER') {
-    listenTasks(
-      query(
-        collection(db, 'tasks'),
-        where('assigneeId', '==', member.uid)
-      ),
-      'manager-assigned'
-    );
+  
+} else if (member.role === 'MANAGER') {
+  listenTasks(
+    query(
+      collection(db, 'tasks'),
+      where('assigneeId', '==', member.uid)
+    ),
+    'manager-assigned'
+  );
 
-    listenTasks(
-      query(
-        collection(db, 'tasks'),
-        where('createdBy', '==', member.uid)
-      ),
-      'manager-created'
-    );
+  listenTasks(
+    query(
+      collection(db, 'tasks'),
+      where('createdBy', '==', member.uid)
+    ),
+    'manager-created'
+  );
 
-    window.members = [member];
+  window._usersUnsubscribe = onSnapshot(
+    query(
+      collection(db, 'users'),
+      where('managerUid', '==', member.uid)
+    ),
+    (snapshot) => {
+      const directReports = snapshot.docs.map(
+        d => profileToMember(d.id, d.data())
+      );
+
+      window.managedUsers = [member, ...directReports];
+
+      window.members = window.managedUsers.filter(
+        m => m.status === 'ACTIVE'
+      );
+
+      if (window.renderAll) window.renderAll();
+    },
+    (error) => {
+      console.error('Direct reports listener:', error);
+      window.showToast?.(
+        'Không tải được nhân viên trực tiếp: ' + error.message,
+        'warning'
+      );
+    }
+  );
+
+} 
 
   } else {
     listenTasks(
