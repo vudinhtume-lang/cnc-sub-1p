@@ -77,7 +77,8 @@
     }
     function profileToMember(uid, data) {
       return { id: uid, uid, username: data.username || '', name: data.displayName || '', role: data.role || 'MANAGER', title: data.title || '', status: data.status || 'ACTIVE', managerUid: data.managerUid || '', isManager: uid === ADMIN_UID };
-    async function loadProfile(user) {
+    }
+      async function loadProfile(user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (!snap.exists()) throw new Error('Tài khoản đã xác thực nhưng chưa có hồ sơ trong Firestore. Nhờ Admin tạo hồ sơ users trước.');
       const data = snap.data();
