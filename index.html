@@ -240,7 +240,28 @@
 
       const title = prompt('Chức danh / Tổ:', target.title || '');
       if (title === null) return;
+const managerOptions = (window.managedUsers || [])
+  .filter(u => u.uid !== uid && u.role === 'MANAGER' && u.status === 'ACTIVE');
 
+const managerList = managerOptions
+  .map(u => `${u.uid} = ${u.name}`)
+  .join('\n');
+
+const managerUid = prompt(
+  'Nhập UID quản lý trực tiếp:\n' +
+  'Để trống nếu nhân sự thuộc Admin.\n\n' +
+  managerList,
+  target.managerUid || ''
+);
+
+if (managerUid === null) return;
+
+if (
+  managerUid.trim() !== '' &&
+  !managerOptions.some(u => u.uid === managerUid.trim())
+) {
+  return window.showToast('UID quản lý không hợp lệ.', 'warning');
+}
       const role = prompt('Nhập quyền MANAGER hoặc USER:', target.role);
       if (role === null) return;
 
@@ -253,6 +274,7 @@
         await updateDoc(doc(db, 'users', uid), {
           displayName: name.trim(),
           title: title.trim(),
+          managerUid: managerUid.trim(),
           role: newRole,
           updatedAt: new Date().toISOString(),
           updatedBy: ADMIN_UID
