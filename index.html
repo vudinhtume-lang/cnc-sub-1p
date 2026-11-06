@@ -1188,7 +1188,23 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
       const pad = (n) => n < 10 ? '0' + n : n;
       return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
+window.openMemberTasks = function(memberId) {
+  if (!window.loggedInUser) return;
 
+  window.quickRoleMode = 'all';
+
+  window.switchTab('tasks');
+
+  const select = document.getElementById('filter-assignee-select');
+  if (select) {
+    select.value = memberId;
+  }
+
+  const search = document.getElementById('task-search-input');
+  if (search) search.value = '';
+
+  window.setTaskFilter('status', 'all');
+};
     window.switchTab = function(tabName) {
       window.currentTab = tabName;
       ['dashboard', 'tasks', 'add-task', 'reminders', 'settings'].forEach(t => {
