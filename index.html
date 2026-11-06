@@ -916,8 +916,6 @@ const managerUid = choiceNumber === 0
         Notification.permission === 'denied' ? 'Đang bị chặn trong cài đặt trình duyệt' : 'Chưa cấp quyền thông báo';
     }
 
-    window.handleCloudTasksSnapshot = function(cloudTasks) {
-    
 window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
   if (!window._taskSnapshotSources) {
     window._taskSnapshotSources = new Map();
