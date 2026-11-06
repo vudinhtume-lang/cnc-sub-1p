@@ -1317,8 +1317,10 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
 
       // Render Sub-Managers List Sorted by Priority/Overdue Count
       const membersListEl = document.getElementById('dashboard-members-list');
-      const subMembers = window.members.filter(m => !m.isManager);
-
+      const subMembers = window.members.filter(m =>
+  !m.isManager &&
+  (!window.loggedInUser || m.id !== window.loggedInUser.id)
+);
       const memberStats = subMembers.map(m => {
         const mTasks = window.tasks.filter(t => t.assigneeId === m.id);
         const mOverdue = mTasks.filter(t => isOverdue(t)).length;
