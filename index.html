@@ -161,8 +161,17 @@
             <p class="text-[10px] text-gray-500 truncate">${escapeHtml(u.username)} · ${u.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã khóa'}</p>
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <button type="button" onclick="toggleManagerStatus('${u.uid}')" class="px-2 py-1.5 rounded-lg text-[10px] font-semibold ${u.status === 'ACTIVE' ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'}">${u.status === 'ACTIVE' ? 'Khóa' : 'Mở'}</button>
-          </div>
+  <button type="button"
+    onclick="editManagedUser('${u.uid}')"
+    class="px-2 py-1.5 rounded-lg text-[10px] font-semibold bg-blue-50 text-blue-700">
+    Sửa
+  </button>
+  <button type="button"
+    onclick="toggleManagerStatus('${u.uid}')"
+    class="px-2 py-1.5 rounded-lg text-[10px] font-semibold ${u.status === 'ACTIVE' ? 'bg-rose-50 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'}">
+    ${u.status === 'ACTIVE' ? 'Khóa' : 'Mở'}
+  </button>
+</div>
         </div>`).join('');
     }
 
