@@ -2298,7 +2298,7 @@ window.renderTaskUpdateNotifications = function() {
       setTimeout(window.checkUnacknowledgedTasks, 500);
     }
 
-    window.handleTaskFormSubmit = function(e) {
+    window.handleTaskFormSubmit = async function(e) {
       e.preventDefault();
       
       if (!window.loggedInUser || !window.loggedInUser.isManager) {
