@@ -1321,6 +1321,11 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
           ? formatDateTime(task.deadline)
           : 'Chưa thiết lập';
 
+                window.showToast(
+          `DEBUG: Hạn cũ ${oldDeadline} → Hạn mới ${newDeadline}`,
+          'info'
+        );
+        
         safeNotify(
           'CNC SUB 1P - Thay đổi thời hạn',
           `${task.title}\nHạn cũ: ${oldDeadline}\nHạn mới: ${newDeadline}`,
