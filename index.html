@@ -1175,10 +1175,12 @@ const managerUid = choiceNumber === 0
     window._cloudSnapshotInitialized = false;
     window._knownCloudTasks = new Map();
 
-    function safeNotify(title, body) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        try { new Notification(title, { body, tag: 'cnc-sub-1p-task' }); } catch (_) {}
-      }
+    function safeNotify(title, body, tag = 'cnc-sub-1p-task') {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification(title, { body, tag });
+    } catch (_) {}
+  }
     }
 
     window.enableBrowserNotifications = async function() {
@@ -1204,6 +1206,80 @@ const managerUid = choiceNumber === 0
         Notification.permission === 'denied' ? 'Đang bị chặn trong cài đặt trình duyệt' : 'Chưa cấp quyền thông báo';
     }
 
+// V9: TỰ ĐỘNG NHẮC HẠN CÔNG VIỆC
+function checkDeadlineNotifications() {
+  if (
+    !window.loggedInUser ||
+    !('Notification' in window) ||
+    Notification.permission !== 'granted'
+  ) return;
+
+  let tasks = [...(window.tasks || [])];
+
+  if (window.quickRoleMode === 'my_tasks') {
+    tasks = tasks.filter(
+      t => t.assigneeId === window.loggedInUser.id
+    );
+  }
+
+  const now = Date.now();
+
+  tasks.forEach(t => {
+    if (t.status === 'done' || !t.deadline) return;
+
+    const deadline = new Date(t.deadline).getTime();
+    if (!Number.isFinite(deadline)) return;
+
+    let type = '';
+    let title = '';
+
+    if (deadline <= now) {
+      type = 'overdue';
+      title = 'CNC SUB 1P - Công việc quá hạn';
+    } else if (deadline <= now + 60 * 60 * 1000) {
+      type = 'upcoming';
+      title = 'CNC SUB 1P - Sắp đến hạn';
+    } else {
+      return;
+    }
+
+    const key = `cnc_deadline_${type}_${t.id}_${deadline}`;
+
+    if (localStorage.getItem(key)) return;
+
+    const assignee = (window.members || []).find(
+      m => m.id === t.assigneeId
+    );
+
+    const body = [
+      t.title || 'Công việc chưa có tiêu đề',
+      `Phụ trách: ${assignee?.name || t.assigneeName || 'Chưa rõ'}`,
+      `Hạn: ${formatDateTime(t.deadline)}`
+    ].join('\n');
+
+    safeNotify(
+      title,
+      body,
+      `cnc-deadline-${type}-${t.id}`
+    );
+
+    localStorage.setItem(key, new Date().toISOString());
+  });
+}
+
+function startDeadlineReminderMonitor() {
+  if (window._deadlineReminderInterval) {
+    clearInterval(window._deadlineReminderInterval);
+  }
+
+  checkDeadlineNotifications();
+
+  window._deadlineReminderInterval = setInterval(
+    checkDeadlineNotifications,
+    60 * 1000
+  );
+        }
+    
 window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
   if (!window._taskSnapshotSources) {
     window._taskSnapshotSources = new Map();
