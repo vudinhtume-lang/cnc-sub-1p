@@ -1214,13 +1214,9 @@ function checkDeadlineNotifications() {
     Notification.permission !== 'granted'
   ) return;
 
-  let tasks = [...(window.tasks || [])];
-
-  if (window.quickRoleMode === 'my_tasks') {
-    tasks = tasks.filter(
-      t => t.assigneeId === window.loggedInUser.id
-    );
-  }
+  const tasks = (window.tasks || []).filter(
+  t => t.assigneeId === window.loggedInUser.id
+);
 
   const now = Date.now();
 
