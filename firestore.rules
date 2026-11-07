@@ -39,40 +39,48 @@ service cloud.firestore {
         && userId != "Iy2xpQNDfGS5LYdM15shqELoGWz2";
     }
 
-    match /tasks/{taskId} {
-      allow update: if isAdmin() || (
-  isActiveUser()
-  && resource.data.assigneeId == request.auth.uid
-  && request.resource.data.diff(resource.data).affectedKeys()
-    .hasOnly([
-      'status',
-      'acknowledged',
-      'acknowledgedAt',
-      'updateAcknowledged',
-      'updateAcknowledgedAt',
-      'updateAcknowledgedBy'
-    ])
-  && validTaskStatus()
-  && (
-    !request.resource.data.diff(resource.data).affectedKeys()
-      .hasAny(['acknowledged'])
-    || request.resource.data.acknowledged == true
-  )
-  && (
-    !request.resource.data.diff(resource.data).affectedKeys()
-      .hasAny([
+ match /tasks/{taskId} {
+  allow read: if isActiveUser();
+
+  allow create, delete: if isAdmin();
+
+  allow update: if isAdmin() || (
+    isActiveUser()
+    && resource.data.assigneeId == request.auth.uid
+    && request.resource.data.diff(resource.data).affectedKeys()
+      .hasOnly([
+        'status',
+        'acknowledged',
+        'acknowledgedAt',
         'updateAcknowledged',
         'updateAcknowledgedAt',
         'updateAcknowledgedBy'
       ])
-    || (
-      request.resource.data.updateAcknowledged == true
-      && request.resource.data.updateAcknowledgedBy == request.auth.uid
-      && request.resource.data.updateAcknowledgedAt is string
+    && (
+      !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['status'])
+      || validTaskStatus()
     )
-  )
-);
-    }
+    && (
+      !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['acknowledged'])
+      || request.resource.data.acknowledged == true
+    )
+    && (
+      !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny([
+          'updateAcknowledged',
+          'updateAcknowledgedAt',
+          'updateAcknowledgedBy'
+        ])
+      || (
+        request.resource.data.updateAcknowledged == true
+        && request.resource.data.updateAcknowledgedBy == request.auth.uid
+        && request.resource.data.updateAcknowledgedAt is string
+      )
+    )
+  );
+}
 
     match /{document=**} {
       allow read, write: if false;
