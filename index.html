@@ -1831,45 +1831,131 @@ const memberStats = subMembers.map(m => {
       }).join('');
     }
 
-    window.renderReminders = function() {
-      const container = document.getElementById('reminders-container');
-      const todayTasks = window.tasks.filter(t => {
-        const d = new Date(t.deadline);
-        const now = new Date();
-        return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
+    
+window.renderReminders = function() {
+  const container = document.getElementById('reminders-container');
+  if (!container) return;
 
-      const badge = document.getElementById('nav-reminder-badge');
-      if (todayTasks.length > 0) {
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
+  let tasks = [...(window.tasks || [])];
 
-      if (todayTasks.length === 0) {
-        container.innerHTML = `
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl text-center space-y-2 border border-gray-100 dark:border-gray-700">
-            <i class="fa-solid fa-circle-check text-3xl text-emerald-500"></i>
-            <p class="text-xs font-medium text-gray-600 dark:text-gray-300">Không có công việc nào tới hạn trong ngày hôm nay!</p>
-          </div>
-        `;
-        return;
-      }
+  // Giới hạn theo chế độ xem hiện tại
+  if (window.quickRoleMode === 'my_tasks' && window.loggedInUser) {
+    tasks = tasks.filter(t => t.assigneeId === window.loggedInUser.id);
+  }
 
-      container.innerHTML = todayTasks.map(t => {
-        const assignee = window.members.find(m => m.id === t.assigneeId);
-        return `
-          <div onclick="openTaskDetailModal('${t.id}')" class="bg-white dark:bg-gray-800 p-3.5 rounded-2xl shadow-sm border border-amber-200 dark:border-amber-900 flex items-center justify-between cursor-pointer">
-            <div class="space-y-1">
-              <span class="text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">Hôm nay</span>
-              <h4 class="font-bold text-xs text-gray-900 dark:text-white">${t.title}</h4>
-              <p class="text-[10px] text-gray-500">Phụ trách: <strong>${assignee?.name || t.assigneeName || 'Chưa phân công'}</strong></p>
-            </div>
-            <button class="px-3 py-1.5 bg-amber-500 text-white rounded-xl text-xs font-semibold shadow-sm">Xem</button>
-          </div>
-        `;
-      }).join('');
+  const now = new Date();
+  const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  const overdueTasks = tasks.filter(t => isOverdue(t));
+
+  const unackTasks = tasks.filter(t =>
+    !t.acknowledged && t.status !== 'done'
+  );
+
+  const upcomingTasks = tasks.filter(t => {
+    if (t.status === 'done' || !t.deadline) return false;
+    const deadline = new Date(t.deadline);
+    return deadline >= now && deadline <= next24Hours;
+  });
+
+  const unfinishedTasks = tasks.filter(t => t.status !== 'done');
+
+  // Cập nhật số lượng
+  document.getElementById('reminder-overdue-count').textContent = overdueTasks.length;
+  document.getElementById('reminder-unack-count').textContent = unackTasks.length;
+  document.getElementById('reminder-upcoming-count').textContent = upcomingTasks.length;
+  document.getElementById('reminder-unfinished-count').textContent = unfinishedTasks.length;
+
+  // Cập nhật dấu thông báo
+  const badge = document.getElementById('nav-reminder-badge');
+  if (badge) {
+    badge.classList.toggle('hidden', unfinishedTasks.length === 0);
+  }
+
+  // Phân loại mức độ cần chú ý
+  const reminderTasks = unfinishedTasks.map(t => {
+    let label = 'Chưa hoàn thành';
+    let color = 'bg-sky-100 text-sky-700';
+    let rank = 4;
+
+    if (isOverdue(t)) {
+      label = 'QUÁ HẠN';
+      color = 'bg-rose-100 text-rose-700';
+      rank = 1;
+    } else if (!t.acknowledged) {
+      label = 'CHỜ XÁC NHẬN';
+      color = 'bg-amber-100 text-amber-700';
+      rank = 2;
+    } else if (
+      t.deadline &&
+      new Date(t.deadline) <= next24Hours
+    ) {
+      label = 'SẮP ĐẾN HẠN';
+      color = 'bg-indigo-100 text-indigo-700';
+      rank = 3;
     }
+
+    return { task: t, label, color, rank };
+  }).sort((a, b) => a.rank - b.rank);
+
+  if (reminderTasks.length === 0) {
+    container.innerHTML = `
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl text-center border border-gray-100 dark:border-gray-700">
+        <i class="fa-solid fa-circle-check text-3xl text-emerald-500"></i>
+        <p class="text-xs font-medium text-gray-600 dark:text-gray-300 mt-2">
+          Tuyệt vời! Không có công việc chưa hoàn thành.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = reminderTasks.map(item => {
+    const t = item.task;
+    const assignee = (window.members || []).find(m => m.id === t.assigneeId);
+    const title = String(t.title || 'Không có tiêu đề')
+      .replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;',
+        '"': '&quot;', "'": '&#39;'
+      })[ch]);
+
+    const name = String(
+      assignee?.name || t.assigneeName || 'Chưa phân công'
+    ).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;',
+      '"': '&quot;', "'": '&#39;'
+    })[ch]);
+
+    return `
+      <div onclick="openTaskDetailModal('${t.id}')"
+        class="bg-white dark:bg-gray-800 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer">
+
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-[9px] px-2 py-1 rounded-full font-bold ${item.color}">
+            ${item.label}
+          </span>
+          <span class="text-[10px] text-gray-500">
+            ${t.deadline ? formatDateTime(t.deadline) : 'Chưa có hạn'}
+          </span>
+        </div>
+
+        <h4 class="font-bold text-xs text-gray-900 dark:text-white">
+          ${title}
+        </h4>
+
+        <div class="flex justify-between items-center mt-2">
+          <p class="text-[10px] text-gray-500">
+            Phụ trách: <strong>${name}</strong>
+          </p>
+          <span class="text-[10px] text-brand-600 font-semibold">
+            Xem chi tiết →
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
 
     window.openRoleModal = function() {
       document.getElementById('login-name-input').value = '';
