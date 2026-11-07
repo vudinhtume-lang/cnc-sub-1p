@@ -2188,12 +2188,74 @@ window.renderReminders = function() {
       let targetTask = null;
 
       if (id) {
-        const idx = window.tasks.findIndex(t => t.id === id);
-        if (idx !== -1) {
-          window.tasks[idx] = { ...window.tasks[idx], title, assigneeId, assigneeName: window.members.find(m => m.id === assigneeId)?.name || '', priority, deadline, desc };
-          targetTask = window.tasks[idx];
-          window.showToast('Cập nhật task thành công!', 'success');
-        }
+  const idx = window.tasks.findIndex(t => t.id === id);
+
+  if (idx !== -1) {
+    const oldTask = window.tasks[idx];
+    const changedFields = [];
+
+    const oldAssignee = window.members.find(
+      m => m.id === oldTask.assigneeId
+    )?.name || oldTask.assigneeName || 'Chưa rõ';
+
+    const newAssignee = window.members.find(
+      m => m.id === assigneeId
+    )?.name || 'Chưa rõ';
+
+    if (oldTask.title !== title) {
+      changedFields.push(`Tên công việc: ${oldTask.title} → ${title}`);
+    }
+
+    if (oldTask.assigneeId !== assigneeId) {
+      changedFields.push(`Người phụ trách: ${oldAssignee} → ${newAssignee}`);
+    }
+
+    if (oldTask.priority !== priority) {
+      changedFields.push(`Độ ưu tiên: ${oldTask.priority} → ${priority}`);
+    }
+
+    if (oldTask.deadline !== deadline) {
+      changedFields.push(
+        `Deadline: ${oldTask.deadline || 'Chưa có'} → ${deadline || 'Chưa có'}`
+      );
+    }
+
+    if ((oldTask.desc || '') !== desc) {
+      changedFields.push('Nội dung ghi chú đã thay đổi');
+    }
+
+    targetTask = {
+      ...oldTask,
+      title,
+      assigneeId,
+      assigneeName: newAssignee,
+      priority,
+      deadline,
+      desc
+    };
+
+    if (changedFields.length > 0) {
+      targetTask.updateVersion =
+        (Number(oldTask.updateVersion) || 0) + 1;
+
+      targetTask.updateChanges = changedFields;
+      targetTask.updateAcknowledged = false;
+      targetTask.updateAcknowledgedAt = null;
+      targetTask.updateAcknowledgedBy = '';
+      targetTask.updateBy = window.loggedInUser.name || '';
+      targetTask.updateAt = new Date().toISOString();
+    }
+
+    window.tasks[idx] = targetTask;
+
+    window.showToast(
+      changedFields.length > 0
+        ? 'Đã ghi nhận nội dung cập nhật!'
+        : 'Không có nội dung nào thay đổi.',
+      'success'
+    );
+  }
+  }
       } else {
         targetTask = {
           id: 'task-' + Date.now(),
