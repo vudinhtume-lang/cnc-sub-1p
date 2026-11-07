@@ -1303,7 +1303,6 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
 
   const allTasks = Array.from(merged.values());
 
-        Fix V9 deadline notification placement
   if (window._cloudSnapshotInitialized && window.loggedInUser) {
     allTasks.forEach(task => {
       const old = previous.get(String(task.id));
