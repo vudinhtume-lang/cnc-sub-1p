@@ -40,21 +40,38 @@ service cloud.firestore {
     }
 
     match /tasks/{taskId} {
-      allow read: if isActiveUser();
-      allow create, delete: if isAdmin();
-
       allow update: if isAdmin() || (
-        isActiveUser()
-        && resource.data.assigneeId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'acknowledged', 'acknowledgedAt'])
-        && validTaskStatus()
-        && (
-          !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['acknowledged'])
-          || request.resource.data.acknowledged == true
-        )
-      );
+  isActiveUser()
+  && resource.data.assigneeId == request.auth.uid
+  && request.resource.data.diff(resource.data).affectedKeys()
+    .hasOnly([
+      'status',
+      'acknowledged',
+      'acknowledgedAt',
+      'updateAcknowledged',
+      'updateAcknowledgedAt',
+      'updateAcknowledgedBy'
+    ])
+  && validTaskStatus()
+  && (
+    !request.resource.data.diff(resource.data).affectedKeys()
+      .hasAny(['acknowledged'])
+    || request.resource.data.acknowledged == true
+  )
+  && (
+    !request.resource.data.diff(resource.data).affectedKeys()
+      .hasAny([
+        'updateAcknowledged',
+        'updateAcknowledgedAt',
+        'updateAcknowledgedBy'
+      ])
+    || (
+      request.resource.data.updateAcknowledged == true
+      && request.resource.data.updateAcknowledgedBy == request.auth.uid
+      && request.resource.data.updateAcknowledgedAt is string
+    )
+  )
+);
     }
 
     match /{document=**} {
