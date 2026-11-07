@@ -82,6 +82,66 @@ service cloud.firestore {
   );
 }
 
+match /task_history/{historyId} {
+
+  function canAccessTask(taskId) {
+    return exists(
+      /databases/$(database)/documents/tasks/$(taskId)
+    ) && (
+      isAdmin()
+      || get(
+        /databases/$(database)/documents/tasks/$(taskId)
+      ).data.assigneeId == request.auth.uid
+      || get(
+        /databases/$(database)/documents/tasks/$(taskId)
+      ).data.createdBy == request.auth.uid
+      || (
+        exists(
+          /databases/$(database)/documents/users/$(
+            get(
+              /databases/$(database)/documents/tasks/$(taskId)
+            ).data.assigneeId
+          )
+        )
+        && get(
+          /databases/$(database)/documents/users/$(
+            get(
+              /databases/$(database)/documents/tasks/$(taskId)
+            ).data.assigneeId
+          )
+        ).data.managerUid == request.auth.uid
+      )
+    );
+  }
+
+  allow read: if isAdmin()
+    || (
+      hasActiveProfile()
+      && canAccessTask(resource.data.taskId)
+    );
+
+  allow create: if hasActiveProfile()
+    && request.resource.data.keys().hasOnly([
+      'taskId',
+      'taskTitle',
+      'action',
+      'details',
+      'actorUid',
+      'actorName',
+      'createdAt'
+    ])
+    && request.resource.data.actorUid == request.auth.uid
+    && request.resource.data.taskId is string
+    && request.resource.data.action in [
+      'CREATE',
+      'UPDATE',
+      'STATUS_CHANGE',
+      'ACKNOWLEDGE'
+    ]
+    && canAccessTask(request.resource.data.taskId);
+
+  allow update, delete: if false;
+}
     match /{document=**} {
       allow read, write: if false;
     }
