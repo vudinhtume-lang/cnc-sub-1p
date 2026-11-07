@@ -2132,19 +2132,27 @@ window.renderTaskUpdateNotifications = function() {
 
   if (task.updateAcknowledged === true) return;
 
-  task.updateAcknowledged = true;
-  task.updateAcknowledgedAt = new Date().toISOString();
-  task.updateAcknowledgedBy = window.loggedInUser.uid;
-
-  saveData();
-  window.renderTaskUpdateNotifications();
-  window.showToast('Đã xác nhận xem cập nhật!', 'success');
+  const updatedTask = {
+    ...task,
+    updateAcknowledged: true,
+    updateAcknowledgedAt: new Date().toISOString(),
+    updateAcknowledgedBy: window.loggedInUser.uid
+  };
 
   try {
-    await syncTaskToCloud(task);
+    await window.cncSyncTask(updatedTask);
+
+    Object.assign(task, updatedTask);
+    saveData();
+    window.renderTaskUpdateNotifications();
+
+    window.showToast('Đã xác nhận xem cập nhật!', 'success');
   } catch (error) {
-    console.error(error);
-    window.showToast('Chưa đồng bộ được xác nhận lên Cloud!', 'error');
+    console.error('Lỗi xác nhận cập nhật:', error);
+    window.showToast(
+      'Không lưu được xác nhận lên Cloud: ' + error.message,
+      'error'
+    );
   }
 };
     window.openRoleModal = function() {
