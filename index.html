@@ -2404,9 +2404,37 @@ window.renderTaskUpdateNotifications = function() {
       }
 
       saveData();
-      syncTaskToCloud(targetTask);
-      window.cancelEditTask();
-      window.switchTab('tasks');
+
+try {
+  await window.cncSyncTask(targetTask);
+
+  if (!id) {
+    try {
+      await window.cncLogTaskActivity(
+        targetTask.id,
+        'CREATE',
+        `Đã tạo và phân công nhiệm vụ cho ${targetTask.assigneeName}`,
+        targetTask.title
+      );
+    } catch (logError) {
+      console.error('Lỗi ghi nhật ký tạo nhiệm vụ:', logError);
+      window.showToast(
+        'Nhiệm vụ đã lưu nhưng chưa ghi được nhật ký!',
+        'warning'
+      );
+    }
+  }
+} catch (error) {
+  console.error('Lỗi lưu nhiệm vụ:', error);
+  window.showToast(
+    'Không lưu được nhiệm vụ lên Cloud: ' + error.message,
+    'error'
+  );
+  return;
+}
+
+window.cancelEditTask();
+window.switchTab('tasks');
     }
 
     window.cancelEditTask = function() {
