@@ -500,6 +500,21 @@ const managerUid = choiceNumber === 0
       if (!auth.currentUser) throw new Error('Vui lòng đăng nhập trước.');
       await setDoc(doc(db, 'tasks', String(task.id)), task);
     };
+    window.cncAcknowledgeTaskUpdate = async (taskId, uid) => {
+  if (!auth.currentUser) {
+    throw new Error('Vui lòng đăng nhập trước.');
+  }
+
+  if (auth.currentUser.uid !== uid) {
+    throw new Error('Tài khoản xác nhận không hợp lệ.');
+  }
+
+  await updateDoc(doc(db, 'tasks', String(taskId)), {
+    updateAcknowledged: true,
+    updateAcknowledgedAt: new Date().toISOString(),
+    updateAcknowledgedBy: uid
+  });
+};
     window.cncDeleteTask = async (taskId) => {
       if (!auth.currentUser) throw new Error('Vui lòng đăng nhập trước.');
       await deleteDoc(doc(db, 'tasks', String(taskId)));
