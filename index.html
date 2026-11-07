@@ -2408,7 +2408,7 @@ let changedFields = [];
 try {
   await window.cncSyncTask(targetTask);
 
-  if (!id) {
+    if (!id) {
     try {
       await window.cncLogTaskActivity(
         targetTask.id,
@@ -2423,7 +2423,22 @@ try {
         'warning'
       );
     }
-  }
+  } else if (changedFields.length > 0) {
+    try {
+      await window.cncLogTaskActivity(
+        targetTask.id,
+        'UPDATE',
+        changedFields.join('\n'),
+        targetTask.title
+      );
+    } catch (logError) {
+      console.error('Lỗi ghi nhật ký cập nhật nhiệm vụ:', logError);
+      window.showToast(
+        'Nhiệm vụ đã cập nhật nhưng chưa ghi được nhật ký!',
+        'warning'
+      );
+    }
+    }
 } catch (error) {
   console.error('Lỗi lưu nhiệm vụ:', error);
   window.showToast(
