@@ -1572,10 +1572,23 @@ const memberStats = subMembers.map(m => {
     ]);
   });
 
-  const csv = '\uFEFFsep=;\r\n' +
-    rows.map(row => row.map(csvCell).join(';')).join('\r\n');
+  const csvText = 'sep=;\r\n' +
+  rows.map(row => row.map(csvCell).join(';')).join('\r\n');
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+// Chuyển dữ liệu sang UTF-16LE
+const utf16 = new Uint8Array(2 + csvText.length * 2);
+utf16[0] = 0xFF;
+utf16[1] = 0xFE;
+
+for (let i = 0; i < csvText.length; i++) {
+  const code = csvText.charCodeAt(i);
+  utf16[2 + i * 2] = code & 0xFF;
+  utf16[3 + i * 2] = code >> 8;
+}
+
+const blob = new Blob([utf16], {
+  type: 'text/csv;charset=utf-16le;'
+});
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
 
