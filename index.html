@@ -2321,7 +2321,7 @@ window.renderReminders = function() {
 
       const task = window.tasks.find(t => t.id === taskId);
       if (!task) return;
-
+      window.switchTab('add-task');
       document.getElementById('task-id-input').value = task.id;
       document.getElementById('task-title-input').value = task.title;
       document.getElementById('task-assignee-input').value = task.assigneeId;
@@ -2330,7 +2330,7 @@ window.renderReminders = function() {
       document.getElementById('task-desc-input').value = task.desc || '';
 
       document.getElementById('form-task-title').innerHTML = `<i class="fa-solid fa-pen text-brand-600"></i> Chỉnh Sửa Công Việc`;
-      window.switchTab('add-task');
+      
     }
 
     window.submitCreateManager = async function() {
