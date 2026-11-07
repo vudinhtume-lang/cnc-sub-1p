@@ -1215,8 +1215,8 @@ function checkDeadlineNotifications() {
   ) return;
 
   const tasks = (window.tasks || []).filter(
-  t => t.assigneeId === window.loggedInUser.id
-);
+    t => t.assigneeId === window.loggedInUser.id
+  );
 
   const now = Date.now();
 
@@ -1226,15 +1226,20 @@ function checkDeadlineNotifications() {
     const deadline = new Date(t.deadline).getTime();
     if (!Number.isFinite(deadline)) return;
 
+    const remaining = deadline - now;
+
     let type = '';
     let title = '';
 
-    if (deadline <= now) {
+    if (remaining <= 0) {
       type = 'overdue';
       title = 'CNC SUB 1P - Công việc quá hạn';
-    } else if (deadline <= now + 60 * 60 * 1000) {
+    } else if (remaining <= 60 * 60 * 1000) {
       type = 'upcoming';
-      title = 'CNC SUB 1P - Sắp đến hạn';
+      title = 'CNC SUB 1P - Còn 1 giờ đến hạn';
+    } else if (remaining <= 24 * 60 * 60 * 1000) {
+      type = 'upcoming_24h';
+      title = 'CNC SUB 1P - Công việc sắp đến hạn';
     } else {
       return;
     }
