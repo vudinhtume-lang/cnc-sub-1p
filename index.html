@@ -499,6 +499,28 @@ const managerUid = choiceNumber === 0
       if (!auth.currentUser) throw new Error('Vui lòng đăng nhập trước.');
       await setDoc(doc(db, 'tasks', String(task.id)), task);
     };
+    window.cncLogTaskActivity = async (
+  taskId,
+  action,
+  details = '',
+  taskTitle = ''
+) => {
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error('Vui lòng đăng nhập trước.');
+  }
+
+  await addDoc(collection(db, 'task_history'), {
+    taskId: String(taskId),
+    taskTitle: String(taskTitle).slice(0, 200),
+    action: String(action),
+    details: String(details).slice(0, 1000),
+    actorUid: user.uid,
+    actorName: String(window.loggedInUser?.name || '').slice(0, 100),
+    createdAt: serverTimestamp()
+  });
+};
     window.cncAcknowledgeTaskUpdate = async (taskId, uid) => {
   if (!auth.currentUser) {
     throw new Error('Vui lòng đăng nhập trước.');
