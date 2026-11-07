@@ -1500,7 +1500,12 @@ const memberStats = subMembers.map(m => {
       window.renderReminders();
     }
 
-    window.exportFilteredTasks = function() {
+   window.exportFilteredTasks = function() {
+  if (typeof XLSX === 'undefined') {
+    window.showToast('Chưa tải được thư viện Excel!', 'error');
+    return;
+  }
+
   let filtered = [...(window.tasks || [])];
 
   const searchVal = (document.getElementById('task-search-input')?.value || '').toLowerCase();
@@ -1540,12 +1545,6 @@ const memberStats = subMembers.map(m => {
     return;
   }
 
-  const csvCell = value => {
-    let v = String(value ?? '');
-    if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
-    return '"' + v.replace(/"/g, '""') + '"';
-  };
-
   const rows = [
     ['STT', 'Tên công việc', 'Người phụ trách', 'Trạng thái', 'Độ ưu tiên', 'Hạn hoàn thành', 'Ghi chú']
   ];
@@ -1566,7 +1565,7 @@ const memberStats = subMembers.map(m => {
 
     rows.push([
       index + 1,
-      t.title,
+      t.title || '',
       assignee?.name || t.assigneeName || 'Chưa giao',
       status,
       priority,
@@ -1575,35 +1574,36 @@ const memberStats = subMembers.map(m => {
     ]);
   });
 
-  const csvText = 'sep=;\r\n' +
-  rows.map(row => row.map(csvCell).join(';')).join('\r\n');
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
 
-// Chuyển dữ liệu sang UTF-16LE
-const utf16 = new Uint8Array(2 + csvText.length * 2);
-utf16[0] = 0xFF;
-utf16[1] = 0xFE;
+  worksheet['!cols'] = [
+    { wch: 7 },
+    { wch: 35 },
+    { wch: 25 },
+    { wch: 18 },
+    { wch: 16 },
+    { wch: 22 },
+    { wch: 45 }
+  ];
 
-for (let i = 0; i < csvText.length; i++) {
-  const code = csvText.charCodeAt(i);
-  utf16[2 + i * 2] = code & 0xFF;
-  utf16[3 + i * 2] = code >> 8;
-}
+  worksheet['!autofilter'] = {
+    ref: worksheet['!ref']
+  };
 
-const blob = new Blob([utf16], {
-  type: 'text/csv;charset=utf-16le;'
-});
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sach cong viec');
 
-  link.href = url;
-  link.download = 'Danh_sach_cong_viec_' +
-    new Date().toISOString().slice(0, 10) + '.csv';
+  workbook.Props = {
+    Title: 'Danh sách công việc CNC SUB 1P',
+    Subject: 'Thống kê công việc',
+    Author: 'CNC SUB 1P'
+  };
 
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  XLSX.writeFile(
+    workbook,
+    'Danh_sach_cong_viec_' +
+    new Date().toISOString().slice(0, 10) + '.xlsx'
+  );
 
   window.showToast(`Đã xuất ${filtered.length} công việc!`, 'success');
 };
