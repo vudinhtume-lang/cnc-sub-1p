@@ -1526,6 +1526,11 @@ const memberStats = subMembers.map(m => {
         });
       }
 
+            const resultCountEl = document.getElementById('tasks-result-count');
+      if (resultCountEl) {
+        resultCountEl.innerText = `Đang hiển thị ${filtered.length} công việc`;
+      }
+
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="text-center py-10 space-y-2">
