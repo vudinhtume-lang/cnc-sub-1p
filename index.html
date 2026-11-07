@@ -2069,7 +2069,55 @@ window.renderReminders = function() {
   }).join('');
 };
 
+window.renderTaskUpdateNotifications = function() {
+  const container = document.getElementById('task-update-notifications');
+  if (!container || !window.loggedInUser) return;
 
+  const pending = (window.tasks || []).filter(t =>
+    t.assigneeId === window.loggedInUser.id &&
+    Number(t.updateVersion) > 0 &&
+    t.updateAcknowledged !== true
+  );
+
+  if (pending.length === 0) {
+    container.innerHTML = `
+      <div class="text-xs text-gray-500 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl">
+        Không có cập nhật nào đang chờ xác nhận.
+      </div>
+    `;
+    return;
+  }
+
+  const escapeHTML = value => String(value || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[ch]);
+
+  container.innerHTML = pending.map(t => `
+    <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-3 rounded-xl">
+      <div class="font-bold text-xs text-gray-900 dark:text-white">
+        ${escapeHTML(t.title)}
+      </div>
+      <div class="text-[10px] text-gray-500 mt-1">
+        Người cập nhật: ${escapeHTML(t.updateBy)}
+      </div>
+      <ul class="mt-2 space-y-1 text-xs text-gray-700 dark:text-gray-300">
+        ${(Array.isArray(t.updateChanges) ? t.updateChanges : [])
+          .map(change => `<li>• ${escapeHTML(change)}</li>`).join('')}
+      </ul>
+      <button type="button"
+        onclick="window.acknowledgeTaskUpdate('${escapeHTML(t.id)}')"
+        class="mt-3 w-full bg-amber-600 text-white text-xs font-bold py-2 rounded-lg">
+        <i class="fa-solid fa-check mr-1"></i>
+        Xác nhận đã xem cập nhật
+      </button>
+    </div>
+  `).join('');
+};
+    
     window.openRoleModal = function() {
       document.getElementById('login-name-input').value = '';
       document.getElementById('user-password-input').value = '';
