@@ -2315,13 +2315,13 @@ window.renderTaskUpdateNotifications = function() {
       const desc = document.getElementById('task-desc-input').value;
 
       let targetTask = null;
-let changedFieldsForLog = [];
+let changedFields = [];
       if (id) {
   const idx = window.tasks.findIndex(t => t.id === id);
 
   if (idx !== -1) {
     const oldTask = window.tasks[idx];
-    changedFieldsForLog = [];
+    changedFields = [];
 
     const oldAssignee = window.members.find(
       m => m.id === oldTask.assigneeId
