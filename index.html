@@ -1307,6 +1307,27 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
     allTasks.forEach(task => {
       const old = previous.get(String(task.id));
 
+      // V9: THÔNG BÁO KHI DEADLINE THAY ĐỔI
+      if (
+        old &&
+        old.deadline !== task.deadline &&
+        task.assigneeId === window.loggedInUser.id
+      ) {
+        const oldDeadline = old.deadline
+          ? formatDateTime(old.deadline)
+          : 'Chưa thiết lập';
+
+        const newDeadline = task.deadline
+          ? formatDateTime(task.deadline)
+          : 'Chưa thiết lập';
+
+        safeNotify(
+          'CNC SUB 1P - Thay đổi thời hạn',
+          `${task.title}\nHạn cũ: ${oldDeadline}\nHạn mới: ${newDeadline}`,
+          `cnc-deadline-changed-${task.id}-${task.deadline}`
+        );
+      }
+      
       if (
         !old &&
         task.assigneeId === window.loggedInUser.id &&
