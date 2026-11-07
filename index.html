@@ -1497,6 +1497,101 @@ const memberStats = subMembers.map(m => {
       window.renderReminders();
     }
 
+    window.exportFilteredTasks = function() {
+  let filtered = [...(window.tasks || [])];
+
+  const searchVal = (document.getElementById('task-search-input')?.value || '').toLowerCase();
+  const assigneeVal = document.getElementById('filter-assignee-select')?.value || 'all';
+  const priorityVal = document.getElementById('filter-priority-select')?.value || 'all';
+
+  if (window.quickRoleMode === 'my_tasks' && window.loggedInUser) {
+    filtered = filtered.filter(t => t.assigneeId === window.loggedInUser.id);
+  }
+
+  if (window.filterStatus !== 'all') {
+    if (window.filterStatus === 'overdue') {
+      filtered = filtered.filter(t => isOverdue(t));
+    } else {
+      filtered = filtered.filter(t => t.status === window.filterStatus);
+    }
+  }
+
+  if (assigneeVal !== 'all') {
+    filtered = filtered.filter(t => t.assigneeId === assigneeVal);
+  }
+
+  if (priorityVal !== 'all') {
+    filtered = filtered.filter(t => t.priority === priorityVal);
+  }
+
+  if (searchVal) {
+    filtered = filtered.filter(t => {
+      const assignee = window.members.find(m => m.id === t.assigneeId);
+      return (t.title || '').toLowerCase().includes(searchVal)
+        || ((assignee?.name || t.assigneeName || '').toLowerCase().includes(searchVal));
+    });
+  }
+
+  if (filtered.length === 0) {
+    window.showToast('Không có công việc để xuất!', 'warning');
+    return;
+  }
+
+  const csvCell = value => {
+    let v = String(value ?? '');
+    if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
+    return '"' + v.replace(/"/g, '""') + '"';
+  };
+
+  const rows = [
+    ['STT', 'Tên công việc', 'Người phụ trách', 'Trạng thái', 'Độ ưu tiên', 'Hạn hoàn thành', 'Ghi chú']
+  ];
+
+  filtered.forEach((t, index) => {
+    const assignee = window.members.find(m => m.id === t.assigneeId);
+
+    let status = 'Chưa làm';
+    if (t.status === 'in_progress') status = 'Đang làm';
+    if (t.status === 'done') status = 'Hoàn thành';
+    if (isOverdue(t)) status = 'Quá hạn';
+
+    const priority = {
+      high: 'Cao',
+      medium: 'Trung bình',
+      low: 'Thấp'
+    }[t.priority] || '';
+
+    rows.push([
+      index + 1,
+      t.title,
+      assignee?.name || t.assigneeName || 'Chưa giao',
+      status,
+      priority,
+      formatDateTime(t.deadline),
+      t.desc || ''
+    ]);
+  });
+
+  const csv = '\uFEFFsep=;\r\n' +
+    rows.map(row => row.map(csvCell).join(';')).join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'Danh_sach_cong_viec_' +
+    new Date().toISOString().slice(0, 10) + '.csv';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  window.showToast(`Đã xuất ${filtered.length} công việc!`, 'success');
+};
+
     window.renderTasks = function() {
       const container = document.getElementById('tasks-container');
       const searchVal = (document.getElementById('task-search-input')?.value || '').toLowerCase();
