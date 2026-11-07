@@ -2279,24 +2279,65 @@ window.renderTaskUpdateNotifications = function() {
       }
     }
 
-    window.confirmTaskAcknowledgement = function() {
-      if (!window.currentAckTask) return;
+    window.confirmTaskAcknowledgement = async function() {
+  if (!window.currentAckTask) return;
 
-      const taskIdx = window.tasks.findIndex(t => t.id === window.currentAckTask.id);
-      if (taskIdx !== -1) {
-        window.tasks[taskIdx].acknowledged = true;
-        window.tasks[taskIdx].acknowledgedAt = new Date().toISOString();
-        saveData();
-        syncTaskToCloud(window.tasks[taskIdx]);
-        window.renderAll();
-        window.showToast('Đã xác nhận nhận nhiệm vụ thành công!', 'success');
-      }
+  const taskIdx = window.tasks.findIndex(
+    t => t.id === window.currentAckTask.id
+  );
 
-      document.getElementById('task-ack-modal').classList.add('hidden');
-      window.currentAckTask = null;
-      
-      setTimeout(window.checkUnacknowledgedTasks, 500);
+  if (taskIdx === -1) return;
+
+  const task = window.tasks[taskIdx];
+
+  if (task.acknowledged) {
+    document.getElementById('task-ack-modal').classList.add('hidden');
+    window.currentAckTask = null;
+    return;
+  }
+
+  task.acknowledged = true;
+  task.acknowledgedAt = new Date().toISOString();
+
+  saveData();
+
+  try {
+    await window.cncSyncTask(task);
+
+    try {
+      await window.cncLogTaskActivity(
+        task.id,
+        'ACKNOWLEDGE',
+        'Người phụ trách đã xác nhận tiếp nhận nhiệm vụ.',
+        task.title
+      );
+    } catch (logError) {
+      console.error('Lỗi ghi nhật ký xác nhận:', logError);
+      window.showToast(
+        'Đã xác nhận nhiệm vụ nhưng chưa ghi được nhật ký!',
+        'warning'
+      );
     }
+
+    window.renderAll();
+    window.showToast(
+      'Đã xác nhận nhận nhiệm vụ thành công!',
+      'success'
+    );
+
+    document.getElementById('task-ack-modal').classList.add('hidden');
+    window.currentAckTask = null;
+
+    setTimeout(window.checkUnacknowledgedTasks, 500);
+
+  } catch (error) {
+    console.error('Lỗi lưu xác nhận nhiệm vụ:', error);
+    window.showToast(
+      'Không lưu được xác nhận lên Cloud: ' + error.message,
+      'error'
+    );
+  }
+};
 
     window.handleTaskFormSubmit = async function(e) {
       e.preventDefault();
