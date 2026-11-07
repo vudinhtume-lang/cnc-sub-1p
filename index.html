@@ -1328,7 +1328,9 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
 
   window._knownCloudTasks = merged;
   window._cloudSnapshotInitialized = true;
-  window.tasks = allTasks;
+  window.tasks = allTask
+
+  checkDeadlineNotifications();
 
   if (window.checkUnacknowledgedTasks) {
     window.checkUnacknowledgedTasks();
