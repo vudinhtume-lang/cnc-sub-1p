@@ -2135,6 +2135,14 @@ window.renderTaskUpdateNotifications = function() {
 };
     window.acknowledgeTaskUpdate = async function(taskId) {
   if (!window.loggedInUser) return;
+        alert(
+    'FIREBASE AUTH UID:\n' +
+    (window.auth?.currentUser?.uid || 'KHÔNG CÓ UID') +
+    '\n\nAPP USER UID:\n' +
+    (window.loggedInUser?.uid || 'KHÔNG CÓ UID') +
+    '\n\nAPP MEMBER ID:\n' +
+    (window.loggedInUser?.id || 'KHÔNG CÓ ID')
+  );
 
   const task = (window.tasks || []).find(
     t => String(t.id) === String(taskId)
