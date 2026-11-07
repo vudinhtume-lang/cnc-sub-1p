@@ -2147,21 +2147,21 @@ window.renderTaskUpdateNotifications = function() {
 
   if (task.updateAcknowledged === true) return;
 
-  const updatedTask = {
-    ...task,
-    updateAcknowledged: true,
-    updateAcknowledgedAt: new Date().toISOString(),
-    updateAcknowledgedBy: window.loggedInUser.uid
-  };
-
   try {
-    await window.cncSyncTask(updatedTask);
+    await window.cncAcknowledgeTaskUpdate(
+      task.id,
+      window.loggedInUser.uid
+    );
 
-    Object.assign(task, updatedTask);
+    task.updateAcknowledged = true;
+    task.updateAcknowledgedAt = new Date().toISOString();
+    task.updateAcknowledgedBy = window.loggedInUser.uid;
+
     saveData();
     window.renderTaskUpdateNotifications();
 
     window.showToast('Đã xác nhận xem cập nhật!', 'success');
+
   } catch (error) {
     console.error('Lỗi xác nhận cập nhật:', error);
     window.showToast(
