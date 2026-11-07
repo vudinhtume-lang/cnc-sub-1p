@@ -2399,6 +2399,7 @@ window.renderReminders = function() {
       window.renderAll();
       window.checkUnacknowledgedTasks();
       updateNotificationPermissionLabel();
+      startDeadlineReminderMonitor();
       const zaloInput = document.getElementById('zalo-group-link-input');
       if (zaloInput) zaloInput.value = localStorage.getItem('cnc_zalo_group_link') || '';
 
