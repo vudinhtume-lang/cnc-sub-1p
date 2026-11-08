@@ -2335,7 +2335,12 @@ window.renderTaskUpdateNotifications = function() {
 
     setTimeout(window.checkUnacknowledgedTasks, 500);
 
-  } catch (error) {
+    } catch (error) {
+    task.acknowledged = false;
+    task.acknowledgedAt = null;
+    saveData();
+    window.renderAll();
+
     console.error('Lỗi lưu xác nhận nhiệm vụ:', error);
     window.showToast(
       'Không lưu được xác nhận lên Cloud: ' + error.message,
