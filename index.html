@@ -2578,8 +2578,19 @@ window.renderExecutiveOverview = function() {
     b.done - a.done
   );
 
-  topEl.innerText = memberStats.length
-    ? `${memberStats[0].name} · ${memberStats[0].percent}%`
+    topEl.innerHTML = memberStats.length
+    ? memberStats.slice(0, 5).map((m, index) => `
+        <div class="flex justify-between gap-2 mt-1">
+          <span>${index + 1}. ${String(m.name).replace(/[&<>"']/g, ch => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+          })[ch])}</span>
+          <strong>${m.percent}%</strong>
+        </div>
+      `).join('')
     : 'Chưa có dữ liệu';
 
   const openTasks = currentTasks.filter(t => t.status !== 'done');
