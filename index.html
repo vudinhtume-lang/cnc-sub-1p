@@ -2481,6 +2481,160 @@ const memberStats = subMembers.map(m => {
     }).join('');
 };
 
+// V13.4 - Executive Management Overview
+window.renderExecutiveOverview = function() {
+  const topEl = document.getElementById('executive-top-performer');
+  const issueEl = document.getElementById('executive-top-issue');
+  const compareEl = document.getElementById('executive-period-comparison');
+  const insightEl = document.getElementById('executive-insight');
+
+  if (!topEl || !issueEl || !compareEl || !insightEl) return;
+
+  if (!window.loggedInUser) {
+    topEl.innerText = 'Chưa đăng nhập';
+    issueEl.innerText = 'Chưa có dữ liệu';
+    compareEl.innerText = 'Chưa có dữ liệu';
+    insightEl.innerText = 'Vui lòng đăng nhập để xem tổng quan.';
+    return;
+  }
+
+  const tasks = window.tasks || [];
+  const members = (window.members || []).filter(m => !m.isManager);
+  const now = new Date();
+  const period = document.getElementById('kpi-period')?.value || 'month';
+
+  let start = null;
+  let end = new Date(now);
+  let previousStart = null;
+  let previousEnd = null;
+
+  if (period === 'month' || period === 'last_month') {
+    const offset = period === 'month' ? 0 : -1;
+    start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 1);
+    previousStart = new Date(now.getFullYear(), now.getMonth() + offset - 1, 1);
+    previousEnd = new Date(start);
+  } else if (period === 'quarter') {
+    const qMonth = Math.floor(now.getMonth() / 3) * 3;
+    start = new Date(now.getFullYear(), qMonth, 1);
+    end = new Date(now.getFullYear(), qMonth + 3, 1);
+    previousStart = new Date(now.getFullYear(), qMonth - 3, 1);
+    previousEnd = new Date(start);
+  } else if (period === 'year') {
+    start = new Date(now.getFullYear(), 0, 1);
+    end = new Date(now.getFullYear() + 1, 0, 1);
+    previousStart = new Date(now.getFullYear() - 1, 0, 1);
+    previousEnd = new Date(start);
+  }
+
+  const inRange = (task, from, to) => {
+    if (!task.createdAt) return false;
+    const date = new Date(task.createdAt);
+    return !isNaN(date.getTime()) && date >= from && date < to;
+  };
+
+  const currentTasks = tasks.filter(t =>
+    !start || inRange(t, start, end)
+  );
+
+  const previousTasks = previousStart
+    ? tasks.filter(t => inRange(t, previousStart, previousEnd))
+    : [];
+
+  const doneTasks = currentTasks.filter(t => t.status === 'done');
+
+  const completionRate = currentTasks.length
+    ? Math.round(doneTasks.length / currentTasks.length * 100)
+    : 0;
+
+  const memberStats = members.map(member => {
+    const assigned = currentTasks.filter(
+      t => t.assigneeId === member.id
+    );
+
+    const done = assigned.filter(t => t.status === 'done');
+    const onTime = done.filter(t =>
+      t.completedAt &&
+      t.deadline &&
+      new Date(t.completedAt) <= new Date(t.deadline)
+    ).length;
+
+    return {
+      name: member.name,
+      total: assigned.length,
+      done: done.length,
+      percent: assigned.length
+        ? Math.round(done.length / assigned.length * 100)
+        : 0,
+      onTimeRate: done.length
+        ? Math.round(onTime / done.length * 100)
+        : 0
+    };
+  }).filter(m => m.total > 0);
+
+  memberStats.sort((a, b) =>
+    b.percent - a.percent ||
+    b.onTimeRate - a.onTimeRate ||
+    b.done - a.done
+  );
+
+  topEl.innerText = memberStats.length
+    ? `${memberStats[0].name} · ${memberStats[0].percent}%`
+    : 'Chưa có dữ liệu';
+
+  const openTasks = currentTasks.filter(t => t.status !== 'done');
+  const overdueTasks = openTasks.filter(t =>
+    t.deadline && new Date(t.deadline) < now
+  );
+  const unackTasks = openTasks.filter(t => !t.acknowledged);
+  const todoTasks = openTasks.filter(t => t.status === 'todo');
+
+  const issues = [
+    { label: 'Nhiệm vụ quá hạn', count: overdueTasks.length },
+    { label: 'Chưa xác nhận', count: unackTasks.length },
+    { label: 'Chưa bắt đầu', count: todoTasks.length },
+    { label: 'Đang thực hiện', count: openTasks.filter(t => t.status === 'in_progress').length }
+  ].sort((a, b) => b.count - a.count);
+
+  issueEl.innerText = issues[0]?.count > 0
+    ? `${issues[0].label}: ${issues[0].count}`
+    : 'Không có tồn đọng';
+
+  if (previousStart) {
+    const previousDone = previousTasks.filter(
+      t => t.status === 'done'
+    ).length;
+
+    const previousRate = previousTasks.length
+      ? Math.round(previousDone / previousTasks.length * 100)
+      : 0;
+
+    const delta = completionRate - previousRate;
+    const direction = delta > 0 ? 'Tăng' : delta < 0 ? 'Giảm' : 'Không đổi';
+
+    compareEl.innerText = previousTasks.length
+      ? `${direction} ${Math.abs(delta)} điểm % · Kỳ này ${completionRate}% / Kỳ trước ${previousRate}%`
+      : 'Kỳ trước chưa có dữ liệu để so sánh.';
+  } else {
+    compareEl.innerText = 'Toàn thời gian · Không áp dụng so sánh kỳ trước.';
+  }
+
+  if (currentTasks.length === 0) {
+    insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
+  } else if (overdueTasks.length > 0) {
+    insightEl.innerText =
+      `Ưu tiên xử lý ${overdueTasks.length} nhiệm vụ quá hạn. ` +
+      `Hiện có ${openTasks.length} nhiệm vụ chưa hoàn thành.`;
+  } else if (unackTasks.length > 0) {
+    insightEl.innerText =
+      `Cần theo dõi ${unackTasks.length} nhiệm vụ chưa được xác nhận.`;
+  } else {
+    insightEl.innerText =
+      `Tỷ lệ hoàn thành đạt ${completionRate}%. ` +
+      'Tiếp tục duy trì tiến độ và chất lượng công việc.';
+  }
+};
+
 window.renderKPIBottlenecks = function() {
   const unfinishedEl = document.getElementById('bottleneck-unfinished');
   const overdueEl = document.getElementById('bottleneck-overdue');
