@@ -1147,6 +1147,55 @@ const managerUid = choiceNumber === 0
     </p>
   </div>
     </div>
+  
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-200 dark:border-amber-900 mb-4">
+      <div class="mb-3">
+        <h3 class="font-bold text-sm">Phân tích điểm nghẽn</h3>
+        <p class="text-[10px] text-gray-500 mt-1">
+          Nhận diện các khu vực cần ưu tiên xử lý
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div class="rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3">
+          <p class="text-[10px] text-gray-500">Đang tồn đọng</p>
+          <p id="bottleneck-unfinished" class="text-xl font-bold text-amber-600 mt-1">0</p>
+        </div>
+
+        <div class="rounded-lg bg-rose-50 dark:bg-rose-950/30 p-3">
+          <p class="text-[10px] text-gray-500">Quá hạn</p>
+          <p id="bottleneck-overdue" class="text-xl font-bold text-rose-600 mt-1">0</p>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <p class="text-xs font-bold mb-2">Tồn đọng theo trạng thái</p>
+        <div id="bottleneck-status-list" class="space-y-2">
+          <p class="text-[10px] text-gray-400 text-center py-2">
+            Đang chờ dữ liệu...
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
+        <p class="text-xs font-bold mb-2">Nhân viên cần hỗ trợ</p>
+        <div id="bottleneck-member-list" class="space-y-2">
+          <p class="text-[10px] text-gray-400 text-center py-2">
+            Đang chờ dữ liệu...
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-3">
+        <p class="text-xs font-bold mb-2">Nhiệm vụ kéo dài lâu nhất</p>
+        <div id="bottleneck-oldest-list" class="space-y-2">
+          <p class="text-[10px] text-gray-400 text-center py-2">
+            Đang chờ dữ liệu...
+          </p>
+        </div>
+      </div>
+    </div>
+
     <h3 class="font-bold text-sm mb-3">Hiệu suất theo nhân viên</h3>
     <div id="kpi-member-list" class="space-y-3">
       <p class="text-xs text-gray-500 text-center py-4">
