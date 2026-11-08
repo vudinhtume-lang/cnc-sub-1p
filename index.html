@@ -2024,15 +2024,23 @@ window.renderManagementActionCenter = function() {
       color: 'rose'
     },
     {
-      priority: 2,
-      status: 'unacknowledged',
-      title: 'Nhắc nhân viên tiếp nhận',
-      advice: 'Kiểm tra các nhiệm vụ đang chờ nhân viên xác nhận.',
-      count: unacknowledged,
-      color: 'amber'
-    },
+  priority: 2,
+  status: 'high_overdue',
+  title: 'Công việc ưu tiên Cao bị quá hạn',
+  advice: 'Cần ưu tiên xử lý ngay các nhiệm vụ có mức độ quan trọng cao.',
+  count: highOverdue,
+  color: 'rose'
+},
+{
+  priority: 3,
+  status: 'unacknowledged',
+  title: 'Nhắc nhân viên tiếp nhận',
+  advice: 'Kiểm tra các nhiệm vụ đang chờ nhân viên xác nhận.',
+  count: unacknowledged,
+  color: 'amber'
+},
     {
-      priority: 3,
+      priority: 4,
       status: 'upcoming',
       title: 'Chủ động xử lý việc sắp đến hạn',
       advice: 'Kiểm tra nguồn lực và tiến độ trong 24 giờ tới.',
@@ -2040,7 +2048,7 @@ window.renderManagementActionCenter = function() {
       color: 'indigo'
     },
     {
-      priority: 4,
+      priority: 5,
       status: 'unfinished',
       title: 'Theo dõi công việc tồn đọng',
       advice: 'Rà soát các nhiệm vụ chưa hoàn thành.',
