@@ -2063,6 +2063,176 @@ const memberStats = subMembers.map(m => {
     return created >= startDate && created < endDate;
   });
 
+     
+  // V13.1 - KPI Trend Chart
+  const trendEl = document.getElementById('kpi-trend-chart');
+
+  if (trendEl) {
+    const allTasks = window.tasks || [];
+    const buckets = new Map();
+
+    let chartStart = startDate;
+
+    if (period === 'all') {
+      const dates = allTasks.flatMap(t => [
+        t.createdAt ? new Date(t.createdAt) : null,
+        t.completedAt ? new Date(t.completedAt) : null
+      ]).filter(d => d && !isNaN(d.getTime()));
+
+      if (dates.length > 0) {
+        chartStart = new Date(
+          Math.min(...dates.map(d => d.getTime()))
+        );
+        chartStart = new Date(
+          chartStart.getFullYear(),
+          chartStart.getMonth(),
+          1
+        );
+      } else {
+        chartStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+    }
+
+    const dailyMode = period === 'month' || period === 'last_month';
+
+    const bucketStart = new Date(chartStart);
+    bucketStart.setDate(1);
+
+    const bucketEnd = period === 'last_month'
+      ? new Date(now.getFullYear(), now.getMonth(), 1)
+      : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    let cursor = new Date(bucketStart);
+
+    while (cursor < bucketEnd) {
+      const key = dailyMode
+        ? `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`
+        : `${cursor.getFullYear()}-${cursor.getMonth()}`;
+
+      const label = dailyMode
+        ? String(cursor.getDate())
+        : `${String(cursor.getMonth() + 1).padStart(2, '0')}/${String(cursor.getFullYear()).slice(-2)}`;
+
+      buckets.set(key, {
+        label,
+        created: 0,
+        completed: 0
+      });
+
+      if (dailyMode) {
+        cursor.setDate(cursor.getDate() + 1);
+      } else {
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+    }
+
+    allTasks.forEach(task => {
+      if (task.createdAt) {
+        const created = new Date(task.createdAt);
+
+        if (!isNaN(created.getTime())) {
+          const key = dailyMode
+            ? `${created.getFullYear()}-${created.getMonth()}-${created.getDate()}`
+            : `${created.getFullYear()}-${created.getMonth()}`;
+
+          if (buckets.has(key)) {
+            buckets.get(key).created++;
+          }
+        }
+      }
+
+      if (task.completedAt) {
+        const completed = new Date(task.completedAt);
+
+        if (!isNaN(completed.getTime())) {
+          const key = dailyMode
+            ? `${completed.getFullYear()}-${completed.getMonth()}-${completed.getDate()}`
+            : `${completed.getFullYear()}-${completed.getMonth()}`;
+
+          if (buckets.has(key)) {
+            buckets.get(key).completed++;
+          }
+        }
+      }
+    });
+
+    const data = Array.from(buckets.values());
+
+    if (data.length === 0) {
+      trendEl.innerHTML =
+        '<p class="text-xs text-gray-400 text-center py-10">Chưa có dữ liệu xu hướng.</p>';
+    } else {
+      const maxValue = Math.max(
+        1,
+        ...data.map(d => Math.max(d.created, d.completed))
+      );
+
+      const chartHeight = 190;
+      const top = 12;
+      const bottom = 32;
+      const plotHeight = chartHeight - top - bottom;
+      const groupWidth = 42;
+      const chartWidth = Math.max(320, data.length * groupWidth);
+
+      const bars = data.map((d, i) => {
+        const center = i * groupWidth + groupWidth / 2 + 4;
+        const createdHeight = d.created / maxValue * plotHeight;
+        const completedHeight = d.completed / maxValue * plotHeight;
+
+        return `
+          <rect x="${center - 11}"
+            y="${top + plotHeight - createdHeight}"
+            width="10" height="${Math.max(0, createdHeight)}"
+            rx="2" fill="#3b82f6">
+            <title>Tạo mới: ${d.created}</title>
+          </rect>
+
+          <rect x="${center + 1}"
+            y="${top + plotHeight - completedHeight}"
+            width="10" height="${Math.max(0, completedHeight)}"
+            rx="2" fill="#10b981">
+            <title>Hoàn thành: ${d.completed}</title>
+          </rect>
+
+          <text x="${center}" y="${chartHeight - 10}"
+            text-anchor="middle"
+            font-size="${dailyMode ? 9 : 10}"
+            fill="currentColor">${d.label}</text>
+        `;
+      }).join('');
+
+      const grid = [0, 1, 2, 3, 4].map(i => {
+        const y = top + plotHeight * i / 4;
+        const value = Math.round(maxValue * (4 - i) / 4);
+
+        return `
+          <line x1="28" y1="${y}"
+            x2="${chartWidth}" y2="${y}"
+            stroke="currentColor" opacity="0.12"
+            stroke-dasharray="3 3"/>
+          <text x="23" y="${y + 3}"
+            text-anchor="end"
+            font-size="9"
+            fill="currentColor">${value}</text>
+        `;
+      }).join('');
+
+      trendEl.innerHTML = `
+        <div class="overflow-x-auto">
+          <svg width="${chartWidth}" height="${chartHeight}"
+            viewBox="0 0 ${chartWidth} ${chartHeight}"
+            style="display:block;color:#9ca3af">
+            ${grid}
+            ${bars}
+          </svg>
+        </div>
+        <p class="text-[9px] text-gray-400 mt-2 text-center">
+          ${data.length} ${dailyMode ? 'ngày' : 'tháng'} trong kỳ báo cáo
+        </p>
+      `;
+    }
+  }
+ 
   const total = periodTasks.length;
   const doneTasks = periodTasks.filter(t => t.status === 'done');
 
