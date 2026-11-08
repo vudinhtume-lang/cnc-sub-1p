@@ -2509,34 +2509,89 @@ window.switchTab('tasks');
       document.getElementById('form-task-title').innerHTML = `<i class="fa-solid fa-plus-circle text-brand-600"></i> Tạo Task Phân Công Mới`;
     }
 
-    window.updateTaskStatus = function(taskId, newStatus) {
-      const task = window.tasks.find(t => t.id === taskId);
-      if (!task) return;
+    window.updateTaskStatus = async function(taskId, newStatus) {
+  const task = window.tasks.find(t => t.id === taskId);
+  if (!task) return;
 
-      if (!window.loggedInUser) {
-        window.showToast('Vui lòng đăng nhập tài khoản cá nhân để cập nhật trạng thái!', 'warning');
-        window.openRoleModal();
-        return;
+  if (!window.loggedInUser) {
+    window.showToast('Vui lòng đăng nhập tài khoản cá nhân để cập nhật trạng thái!', 'warning');
+    window.openRoleModal();
+    return;
+  }
+
+  if (!window.loggedInUser.isManager && window.loggedInUser.id !== task.assigneeId) {
+    window.showToast(`Bạn không thể cập nhật task của người khác! Đây là task của: ${window.members.find(m => m.id === task.assigneeId)?.name || task.assigneeName || 'quản lý khác'}`, 'warning');
+    return;
+  }
+
+  const oldStatus = task.status;
+
+  if (oldStatus === newStatus) return;
+
+  const oldAcknowledged = task.acknowledged;
+  const oldAcknowledgedAt = task.acknowledgedAt;
+
+  const statusLabels = {
+    todo: 'Chưa làm',
+    in_progress: 'Đang làm',
+    done: 'Đã hoàn thành'
+  };
+
+  task.status = newStatus;
+
+  if (!task.acknowledged) {
+    task.acknowledged = true;
+    task.acknowledgedAt = new Date().toISOString();
+  }
+
+  saveData();
+
+  try {
+    await window.cncSyncTask(task);
+
+    try {
+      await window.cncLogTaskActivity(
+        task.id,
+        'STATUS_CHANGE',
+        `Trạng thái: ${statusLabels[oldStatus] || oldStatus} → ${statusLabels[newStatus] || newStatus}`,
+        task.title
+      );
+
+      if (!oldAcknowledged) {
+        await window.cncLogTaskActivity(
+          task.id,
+          'ACKNOWLEDGE',
+          'Người phụ trách tự động xác nhận tiếp nhận khi cập nhật trạng thái.',
+          task.title
+        );
       }
-
-      if (!window.loggedInUser.isManager && window.loggedInUser.id !== task.assigneeId) {
-        window.showToast(`Bạn không thể cập nhật task của người khác! Đây là task của: ${window.members.find(m => m.id === task.assigneeId)?.name || task.assigneeName || 'quản lý khác'}`, 'warning');
-        return;
-      }
-
-      task.status = newStatus;
-      if (!task.acknowledged) {
-        task.acknowledged = true;
-        task.acknowledgedAt = new Date().toISOString();
-      }
-
-      saveData();
-      syncTaskToCloud(task);
-      window.renderAll();
-      window.closeTaskDetailModal();
-      window.showToast('Đã cập nhật trạng thái công việc!', 'info');
+    } catch (logError) {
+      console.error('Lỗi ghi nhật ký thay đổi trạng thái:', logError);
+      window.showToast(
+        'Đã cập nhật trạng thái nhưng chưa ghi được nhật ký!',
+        'warning'
+      );
     }
 
+    window.renderAll();
+    window.closeTaskDetailModal();
+    window.showToast('Đã cập nhật trạng thái công việc!', 'success');
+
+  } catch (error) {
+    task.status = oldStatus;
+    task.acknowledged = oldAcknowledged;
+    task.acknowledgedAt = oldAcknowledgedAt;
+
+    saveData();
+    window.renderAll();
+
+    console.error('Lỗi lưu trạng thái công việc:', error);
+    window.showToast(
+      'Không lưu được trạng thái lên Cloud: ' + error.message,
+      'error'
+    );
+  }
+};
     window.deleteTask = function(taskId) {
       if (!window.loggedInUser || !window.loggedInUser.isManager) {
         window.showToast('Chỉ Quản lý Tổng mới có quyền xóa task!', 'warning');
