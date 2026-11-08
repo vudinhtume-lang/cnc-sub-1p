@@ -2272,12 +2272,21 @@ const memberStats = subMembers.map(m => {
   })[ch]);
 
   const memberStats = members.map(member => {
+  
+  const memberStats = members.map(member => {
     const tasks = periodTasks.filter(
       t => t.assigneeId === member.id
     );
 
     const memberDone = tasks.filter(
       t => t.status === 'done'
+    ).length;
+
+    const memberOnTime = tasks.filter(t =>
+      t.status === 'done' &&
+      t.completedAt &&
+      t.deadline &&
+      new Date(t.completedAt) <= new Date(t.deadline)
     ).length;
 
     const memberOverdue = tasks.filter(t =>
@@ -2290,17 +2299,27 @@ const memberStats = subMembers.map(m => {
       ? Math.round(memberDone / tasks.length * 100)
       : 0;
 
+    const onTimeRate = memberDone > 0
+      ? Math.round(memberOnTime / memberDone * 100)
+      : 0;
+
     return {
       name: member.name,
       total: tasks.length,
       done: memberDone,
+      onTime: memberOnTime,
+      onTimeRate,
       overdue: memberOverdue,
       percent
     };
   });
 
   memberStats.sort((a, b) =>
-    b.overdue - a.overdue || b.total - a.total
+    (b.total > 0 ? 1 : 0) - (a.total > 0 ? 1 : 0) ||
+    b.percent - a.percent ||
+    b.onTimeRate - a.onTimeRate ||
+    a.overdue - b.overdue ||
+    b.done - a.done
   );
 
   if (memberStats.length === 0) {
@@ -2309,38 +2328,47 @@ const memberStats = subMembers.map(m => {
     return;
   }
 
-  memberListEl.innerHTML = memberStats.map(s => `
-    <div class="border-b border-gray-100 dark:border-gray-700 pb-3">
-      <div class="flex justify-between items-center gap-2">
-        <div class="min-w-0">
-          <p class="text-xs font-bold truncate">${escapeHTML(s.name)}</p>
-          <p class="text-[10px] text-gray-500 mt-1">
-            ${s.done}/${s.total} hoàn thành
-            · ${s.overdue} quá hạn
-          </p>
-        </div>
-        <span class="text-sm font-bold ${
-          s.percent >= 80 ? 'text-emerald-600' : 'text-blue-600'
-        }">${s.percent}%</span>
-      </div>
-      <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-        <div class="h-full bg-emerald-500 rounded-full"
-          style="width:${s.percent}%"></div>
-      </div>
-    </div>
-  `).join('');
-};
-    
-window.exportKPIReport = function() {
-  if (typeof XLSX === 'undefined') {
-    window.showToast('Chưa tải được thư viện Excel!', 'error');
-    return;
-  }
+  memberListEl.innerHTML = memberStats.map((s, index) => {
+    const rank = index === 0 ? '🥇'
+      : index === 1 ? '🥈'
+      : index === 2 ? '🥉'
+      : `#${index + 1}`;
 
-  if (!window.loggedInUser) {
-    window.showToast('Vui lòng đăng nhập!', 'warning');
-    return;
-  }
+    return `
+      <div class="border-b border-gray-100 dark:border-gray-700 pb-3">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-base w-7 text-center shrink-0">${rank}</span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${escapeHTML(s.name)}</p>
+              <p class="text-[10px] text-gray-500 mt-1">
+                ${s.done}/${s.total} hoàn thành
+              </p>
+            </div>
+          </div>
+
+          <span class="text-sm font-bold ${
+            s.percent >= 80 ? 'text-emerald-600' : 'text-blue-600'
+          }">${s.percent}%</span>
+        </div>
+
+        <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
+          <div class="h-full bg-emerald-500 rounded-full"
+            style="width:${s.percent}%"></div>
+        </div>
+
+        <div class="flex justify-between gap-2 mt-2 text-[10px]">
+          <span class="text-emerald-600">
+            Đúng hạn: ${s.onTime}/${s.done} (${s.onTimeRate}%)
+          </span>
+          <span class="${s.overdue > 0 ? 'text-red-500 font-bold' : 'text-gray-500'}">
+            Quá hạn: ${s.overdue}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
 
   const periodSelect = document.getElementById('kpi-period');
   const period = periodSelect?.value || 'month';
