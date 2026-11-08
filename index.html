@@ -1736,7 +1736,7 @@ window.openMemberTasks = function(memberId) {
 };
     window.switchTab = function(tabName) {
       window.currentTab = tabName;
-      ['dashboard', 'tasks', 'add-task', 'reminders', 'settings'].forEach(t => {
+     ['dashboard', 'tasks', 'add-task', 'reminders', 'reports', 'settings'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`nav-btn-${t}`);
         if (view) {
