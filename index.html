@@ -2008,8 +2008,12 @@ window.renderManagementActionCenter = function() {
     {
       priority: 1,
       status: 'overdue',
-      title: 'Xử lý công việc quá hạn',
-      advice: 'Rà soát nguyên nhân chậm tiến độ và phân công người xử lý.',
+           title: hasOverdueHotspot
+        ? `Ưu tiên xử lý: ${topOverdueMember.name} có nhiều việc quá hạn`
+        : 'Xử lý công việc quá hạn',
+      advice: hasOverdueHotspot
+        ? `${topOverdueMember.count} công việc quá hạn đang tập trung ở nhân viên này. Cần kiểm tra và hỗ trợ.`
+        : 'Rà soát nguyên nhân chậm tiến độ và phân công người xử lý.',
       count: overdue,
       color: 'rose'
     },
