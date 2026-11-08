@@ -1168,6 +1168,24 @@ const managerUid = choiceNumber === 0
         <p id="modal-task-desc" class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-700/20 p-3 rounded-xl min-h-[60px]"></p>
       </div>
 
+      <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+        <button type="button"
+          onclick="window.loadTaskHistory(window.currentDetailTaskId)"
+          class="w-full flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-200">
+          <span>
+            <i class="fa-solid fa-clock-rotate-left text-brand-600 mr-1"></i>
+            Lịch sử hoạt động
+          </span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div id="task-history-container" class="hidden mt-3 space-y-2">
+          <div class="text-xs text-gray-500">
+            Nhấn để xem lịch sử hoạt động.
+          </div>
+        </div>
+      </div>
+      
       <div class="pt-2 space-y-2">
         <div>
           <label class="block text-[11px] font-semibold text-gray-500 mb-1">Cập nhật trạng thái (Chỉ người nhận task):</label>
