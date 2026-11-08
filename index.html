@@ -2086,7 +2086,7 @@ const hasOverloadHotspot =
   topWorkloadMember.count >= 3 &&
   topWorkloadMember.count >= averageWorkload * 1.5 &&
   topWorkloadMember.count >= averageWorkload + 2;
-    const actions = [
+        const actions = [
     {
       priority: 1,
       status: 'overdue',
@@ -2122,6 +2122,18 @@ const hasOverloadHotspot =
     },
     {
       priority: 4,
+      status: 'overload',
+      title: hasOverloadHotspot
+        ? `Cảnh báo quá tải: <span style="color:#e11d48;font-weight:900">${topWorkloadMember.name}</span>`
+        : 'Cảnh báo nhân viên có nguy cơ quá tải',
+      advice: hasOverloadHotspot
+        ? `${topWorkloadMember.name} đang có ${topWorkloadMember.count} công việc chưa hoàn thành, cao hơn đáng kể so với mức trung bình ${averageWorkload.toFixed(1)} việc/người. Cần xem xét phân bổ lại.`
+        : 'Theo dõi và cân đối khối lượng công việc giữa các nhân viên.',
+      count: hasOverloadHotspot ? topWorkloadMember.count : 0,
+      color: 'rose'
+    },
+    {
+      priority: 5,
       status: 'unacknowledged',
       title: 'Nhắc nhân viên tiếp nhận',
       advice: 'Kiểm tra các nhiệm vụ đang chờ nhân viên xác nhận.',
@@ -2129,7 +2141,7 @@ const hasOverloadHotspot =
       color: 'amber'
     },
     {
-      priority: 5,
+      priority: 6,
       status: 'upcoming',
       title: 'Chủ động xử lý việc sắp đến hạn',
       advice: 'Kiểm tra nguồn lực và tiến độ trong 24 giờ tới.',
@@ -2137,7 +2149,7 @@ const hasOverloadHotspot =
       color: 'indigo'
     },
     {
-      priority: 6,
+      priority: 7,
       status: 'unfinished',
       title: 'Theo dõi công việc tồn đọng',
       advice: 'Rà soát các nhiệm vụ chưa hoàn thành.',
@@ -2145,7 +2157,6 @@ const hasOverloadHotspot =
       color: 'sky'
     }
   ];
-
   const activeActions = actions
     .filter(item => item.count > 0)
     .sort((a, b) => a.priority - b.priority);
