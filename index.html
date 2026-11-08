@@ -2766,6 +2766,7 @@ window.switchTab('tasks');
 
   const oldAcknowledged = task.acknowledged;
   const oldAcknowledgedAt = task.acknowledgedAt;
+      const oldCompletedAt = task.completedAt || null;
 
   const statusLabels = {
     todo: 'Chưa làm',
@@ -2774,6 +2775,9 @@ window.switchTab('tasks');
   };
 
   task.status = newStatus;
+      task.completedAt = newStatus === 'done'
+  ? new Date().toISOString()
+  : null;
 
   if (!task.acknowledged) {
     task.acknowledged = true;
