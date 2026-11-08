@@ -887,6 +887,32 @@ const managerUid = choiceNumber === 0
 
 </div>
 
+<!-- V14.1 - Management Action Center -->
+<div id="management-action-center"
+  class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
+
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <h3 class="font-bold text-sm">Trung tâm điều hành</h3>
+      <p class="text-[10px] text-gray-500 mt-1">
+        Các vấn đề cần quản lý ưu tiên xử lý
+      </p>
+    </div>
+
+    <span id="management-action-count"
+      class="text-[10px] font-bold px-2 py-1 rounded-lg bg-indigo-50 text-indigo-600">
+      0 vấn đề
+    </span>
+  </div>
+
+  <div id="management-action-list" class="space-y-2">
+    <p class="text-xs text-gray-400 text-center py-3">
+      Đang chờ dữ liệu...
+    </p>
+  </div>
+
+</div>
+
       <!-- Overdue Alert Banner -->
       <div id="overdue-banner" class="hidden bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl p-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
