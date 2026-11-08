@@ -2365,8 +2365,19 @@ const memberStats = subMembers.map(m => {
         </div>
       </div>
     `;
-  }).join('');
+    }).join('');
+};
 
+window.exportKPIReport = function() {
+  if (typeof XLSX === 'undefined') {
+    window.showToast('Chưa tải được thư viện Excel!', 'error');
+    return;
+  }
+
+  if (!window.loggedInUser) {
+    window.showToast('Vui lòng đăng nhập!', 'warning');
+    return;
+  }
 
   const periodSelect = document.getElementById('kpi-period');
   const period = periodSelect?.value || 'month';
