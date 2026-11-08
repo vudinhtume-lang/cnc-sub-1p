@@ -521,6 +521,92 @@ const managerUid = choiceNumber === 0
     createdAt: serverTimestamp()
   });
 };
+    window.loadTaskHistory = async function(taskId) {
+  const container = document.getElementById('task-history-container');
+  if (!container || !taskId) return;
+
+  if (!container.classList.contains('hidden')) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <div class="text-xs text-gray-500 py-2">
+      <i class="fa-solid fa-spinner fa-spin mr-1"></i>
+      Đang tải lịch sử...
+    </div>
+  `;
+
+  try {
+    const historyQuery = query(
+      collection(db, 'task_history'),
+      where('taskId', '==', String(taskId)),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+
+    const snapshot = await getDocs(historyQuery);
+
+    if (String(window.currentDetailTaskId) !== String(taskId)) return;
+
+    if (snapshot.empty) {
+      container.innerHTML = `
+        <div class="text-xs text-gray-500 py-2">
+          Chưa có lịch sử hoạt động.
+        </div>
+      `;
+      return;
+    }
+
+    const labels = {
+      CREATE: 'Tạo nhiệm vụ',
+      UPDATE: 'Cập nhật nhiệm vụ',
+      STATUS_CHANGE: 'Thay đổi trạng thái',
+      ACKNOWLEDGE: 'Xác nhận tiếp nhận'
+    };
+
+    const escapeHTML = value => String(value || '').replace(/[&<>"']/g, ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[ch]);
+
+    container.innerHTML = snapshot.docs.map(docSnap => {
+      const item = docSnap.data();
+
+      const date = item.createdAt?.toDate
+        ? item.createdAt.toDate().toLocaleString('vi-VN')
+        : 'Chưa xác định';
+
+      return `
+        <div class="border-l-2 border-brand-500 pl-3 py-1">
+          <div class="text-xs font-bold text-gray-800 dark:text-gray-200">
+            ${escapeHTML(labels[item.action] || item.action)}
+          </div>
+          <div class="text-[10px] text-gray-500 mt-1">
+            ${escapeHTML(item.actorName)} · ${escapeHTML(date)}
+          </div>
+          <div class="text-xs text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line">
+            ${escapeHTML(item.details)}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Lỗi tải lịch sử nhiệm vụ:', error);
+
+    container.innerHTML = `
+      <div class="text-xs text-rose-500 py-2">
+        Không tải được lịch sử: ${String(error.message || error)}
+      </div>
+    `;
+  }
+};
+    
     window.cncAcknowledgeTaskUpdate = async (taskId, uid) => {
   if (!auth.currentUser) {
     throw new Error('Vui lòng đăng nhập trước.');
