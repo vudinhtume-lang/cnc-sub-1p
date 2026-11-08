@@ -2183,8 +2183,13 @@ window.renderTaskUpdateNotifications = function() {
 
     window.showToast('Đã xác nhận xem cập nhật!', 'success');
 
-  } catch (error) {
-    console.error('Lỗi xác nhận cập nhật:', error);
+    } catch (error) {
+    task.acknowledged = false;
+    task.acknowledgedAt = null;
+    saveData();
+    window.renderAll();
+
+    console.error('Lỗi lưu xác nhận nhiệm vụ:', error);
     window.showToast(
       'Không lưu được xác nhận lên Cloud: ' + error.message,
       'error'
