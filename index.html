@@ -2938,7 +2938,44 @@ window.switchTab('tasks');
   </script>
   <script>
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW registration:', err)));
+  const hadController = !!navigator.serviceWorker.controller;
+  let updateBannerShown = false;
+
+  function showAppUpdateBanner() {
+    if (updateBannerShown) return;
+    updateBannerShown = true;
+
+    const banner = document.createElement('div');
+    banner.id = 'app-update-banner';
+    banner.className = 'fixed top-3 left-3 right-3 z-[9999] bg-blue-600 text-white p-3 rounded-xl shadow-lg flex items-center justify-between gap-3';
+
+    banner.innerHTML = `
+      <div class="text-xs font-semibold">
+        <i class="fa-solid fa-cloud-arrow-down mr-1"></i>
+        Có phiên bản mới. Hãy cập nhật ứng dụng.
+      </div>
+      <button type="button"
+        onclick="window.location.reload()"
+        class="shrink-0 bg-white text-blue-700 px-3 py-2 rounded-lg text-xs font-bold">
+        Cập nhật
+      </button>
+    `;
+
+    document.body.appendChild(banner);
+  }
+
+  if (hadController) {
+    navigator.serviceWorker.addEventListener('controllerchange', showAppUpdateBanner);
+  }
+
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js');
+      await registration.update();
+    } catch (err) {
+      console.warn('SW registration/update:', err);
+    }
+  });
     }
   </script>
 </body>
