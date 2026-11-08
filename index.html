@@ -1983,6 +1983,153 @@ const memberStats = subMembers.map(m => {
       window.renderTaskUpdateNotifications();
     }
 
+    window.renderKPIReport = function() {
+  const totalEl = document.getElementById('kpi-total');
+  const doneEl = document.getElementById('kpi-done');
+  const onTimeEl = document.getElementById('kpi-on-time');
+  const overdueEl = document.getElementById('kpi-overdue');
+  const rateEl = document.getElementById('kpi-completion-rate');
+  const barEl = document.getElementById('kpi-completion-bar');
+  const memberListEl = document.getElementById('kpi-member-list');
+
+  if (!totalEl || !memberListEl) return;
+
+  if (!window.loggedInUser) {
+    totalEl.innerText = '0';
+    doneEl.innerText = '0';
+    onTimeEl.innerText = '0';
+    overdueEl.innerText = '0';
+    rateEl.innerText = '0%';
+    barEl.style.width = '0%';
+    memberListEl.innerHTML =
+      '<p class="text-xs text-gray-500 text-center py-4">Vui lòng đăng nhập để xem báo cáo KPI.</p>';
+    return;
+  }
+
+  const period = document.getElementById('kpi-period')?.value || 'month';
+  const now = new Date();
+
+  let startDate = null;
+  let endDate = new Date(now);
+
+  if (period === 'month') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === 'last_month') {
+    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    endDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === 'quarter') {
+    const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+    startDate = new Date(now.getFullYear(), quarterMonth, 1);
+  } else if (period === 'year') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  }
+
+  const periodTasks = (window.tasks || []).filter(task => {
+    if (!startDate) return true;
+
+    if (!task.createdAt) return false;
+
+    const created = new Date(task.createdAt);
+    return created >= startDate && created < endDate;
+  });
+
+  const total = periodTasks.length;
+  const doneTasks = periodTasks.filter(t => t.status === 'done');
+
+  const onTime = doneTasks.filter(t => {
+    if (!t.completedAt || !t.deadline) return false;
+
+    return new Date(t.completedAt) <= new Date(t.deadline);
+  }).length;
+
+  const overdue = periodTasks.filter(t =>
+    t.status !== 'done' &&
+    t.deadline &&
+    new Date(t.deadline) < now
+  ).length;
+
+  const completionRate = total > 0
+    ? Math.round(doneTasks.length / total * 100)
+    : 0;
+
+  totalEl.innerText = total;
+  doneEl.innerText = doneTasks.length;
+  onTimeEl.innerText = onTime;
+  overdueEl.innerText = overdue;
+  rateEl.innerText = `${completionRate}%`;
+  barEl.style.width = `${completionRate}%`;
+
+  const members = (window.members || []).filter(m =>
+    !m.isManager
+  );
+
+  const escapeHTML = value => String(value || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[ch]);
+
+  const memberStats = members.map(member => {
+    const tasks = periodTasks.filter(
+      t => t.assigneeId === member.id
+    );
+
+    const memberDone = tasks.filter(
+      t => t.status === 'done'
+    ).length;
+
+    const memberOverdue = tasks.filter(t =>
+      t.status !== 'done' &&
+      t.deadline &&
+      new Date(t.deadline) < now
+    ).length;
+
+    const percent = tasks.length > 0
+      ? Math.round(memberDone / tasks.length * 100)
+      : 0;
+
+    return {
+      name: member.name,
+      total: tasks.length,
+      done: memberDone,
+      overdue: memberOverdue,
+      percent
+    };
+  });
+
+  memberStats.sort((a, b) =>
+    b.overdue - a.overdue || b.total - a.total
+  );
+
+  if (memberStats.length === 0) {
+    memberListEl.innerHTML =
+      '<p class="text-xs text-gray-500 text-center py-4">Chưa có dữ liệu nhân viên.</p>';
+    return;
+  }
+
+  memberListEl.innerHTML = memberStats.map(s => `
+    <div class="border-b border-gray-100 dark:border-gray-700 pb-3">
+      <div class="flex justify-between items-center gap-2">
+        <div class="min-w-0">
+          <p class="text-xs font-bold truncate">${escapeHTML(s.name)}</p>
+          <p class="text-[10px] text-gray-500 mt-1">
+            ${s.done}/${s.total} hoàn thành
+            · ${s.overdue} quá hạn
+          </p>
+        </div>
+        <span class="text-sm font-bold ${
+          s.percent >= 80 ? 'text-emerald-600' : 'text-blue-600'
+        }">${s.percent}%</span>
+      </div>
+      <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
+        <div class="h-full bg-emerald-500 rounded-full"
+          style="width:${s.percent}%"></div>
+      </div>
+    </div>
+  `).join('');
+};
    window.exportFilteredTasks = function() {
   if (typeof XLSX === 'undefined') {
     window.showToast('Chưa tải được thư viện Excel!', 'error');
