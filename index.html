@@ -2057,6 +2057,35 @@ window.renderManagementActionCenter = function() {
 
   const hasAgingHotspot =
     topAgingMember && topAgingMember.count >= 1;
+  // V15.4 - Phát hiện nhân viên có nguy cơ quá tải
+const activeMembers = (window.members || []).filter(
+  m => !m.isManager && m.status === 'ACTIVE'
+);
+
+const workloadByMember = activeMembers.map(member => {
+  const count = openTasks.filter(
+    task => task.assigneeId === member.id
+  ).length;
+
+  return {
+    id: member.id,
+    name: member.name || 'Chưa xác định',
+    count
+  };
+});
+
+const averageWorkload = activeMembers.length > 0
+  ? openTasks.length / activeMembers.length
+  : 0;
+
+const topWorkloadMember = workloadByMember
+  .sort((a, b) => b.count - a.count)[0];
+
+const hasOverloadHotspot =
+  topWorkloadMember &&
+  topWorkloadMember.count >= 3 &&
+  topWorkloadMember.count >= averageWorkload * 1.5 &&
+  topWorkloadMember.count >= averageWorkload + 2;
     const actions = [
     {
       priority: 1,
