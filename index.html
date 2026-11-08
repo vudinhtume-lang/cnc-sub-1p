@@ -2136,6 +2136,252 @@ const memberStats = subMembers.map(m => {
     </div>
   `).join('');
 };
+    
+window.exportKPIReport = function() {
+  if (typeof XLSX === 'undefined') {
+    window.showToast('Chưa tải được thư viện Excel!', 'error');
+    return;
+  }
+
+  if (!window.loggedInUser) {
+    window.showToast('Vui lòng đăng nhập!', 'warning');
+    return;
+  }
+
+  const periodSelect = document.getElementById('kpi-period');
+  const period = periodSelect?.value || 'month';
+  const periodName =
+    periodSelect?.selectedOptions?.[0]?.textContent?.trim()
+    || 'Báo cáo KPI';
+
+  const now = new Date();
+  let startDate = null;
+  let endDate = new Date(now);
+
+  if (period === 'month') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === 'last_month') {
+    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    endDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else if (period === 'quarter') {
+    const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+    startDate = new Date(now.getFullYear(), quarterMonth, 1);
+  } else if (period === 'year') {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  }
+
+  const tasks = (window.tasks || []).filter(task => {
+    if (!startDate) return true;
+    if (!task.createdAt) return false;
+
+    const created = new Date(task.createdAt);
+    return created >= startDate && created < endDate;
+  });
+
+  const doneTasks = tasks.filter(t => t.status === 'done');
+
+  const onTimeTasks = doneTasks.filter(t =>
+    t.completedAt &&
+    t.deadline &&
+    new Date(t.completedAt) <= new Date(t.deadline)
+  );
+
+  const overdueTasks = tasks.filter(t =>
+    t.status !== 'done' &&
+    t.deadline &&
+    new Date(t.deadline) < now
+  );
+
+  const completionRate = tasks.length > 0
+    ? Math.round(doneTasks.length / tasks.length * 100)
+    : 0;
+
+  const onTimeRate = doneTasks.length > 0
+    ? Math.round(onTimeTasks.length / doneTasks.length * 100)
+    : 0;
+
+  const summaryRows = [
+    ['BÁO CÁO KPI - CNC SUB 1P'],
+    ['Kỳ báo cáo', periodName],
+    ['Ngày xuất báo cáo', now.toLocaleString('vi-VN')],
+    [],
+    ['CHỈ SỐ', 'KẾT QUẢ'],
+    ['Tổng công việc', tasks.length],
+    ['Đã hoàn thành', doneTasks.length],
+    ['Hoàn thành đúng hạn', onTimeTasks.length],
+    ['Tỷ lệ đúng hạn trên số việc hoàn thành', onTimeRate + '%'],
+    ['Đang quá hạn', overdueTasks.length],
+    ['Tỷ lệ hoàn thành', completionRate + '%'],
+    ['Chưa hoàn thành', tasks.length - doneTasks.length]
+  ];
+
+  const memberStats = (window.members || [])
+    .filter(m => !m.isManager)
+    .map(member => {
+      const memberTasks = tasks.filter(
+        t => t.assigneeId === member.id
+      );
+
+      const memberDone = memberTasks.filter(
+        t => t.status === 'done'
+      ).length;
+
+      const memberOnTime = memberTasks.filter(t =>
+        t.status === 'done' &&
+        t.completedAt &&
+        t.deadline &&
+        new Date(t.completedAt) <= new Date(t.deadline)
+      ).length;
+
+      const memberOverdue = memberTasks.filter(t =>
+        t.status !== 'done' &&
+        t.deadline &&
+        new Date(t.deadline) < now
+      ).length;
+
+      return {
+        name: member.name || '',
+        total: memberTasks.length,
+        done: memberDone,
+        onTime: memberOnTime,
+        overdue: memberOverdue,
+        percent: memberTasks.length > 0
+          ? Math.round(memberDone / memberTasks.length * 100)
+          : 0
+      };
+    });
+
+  memberStats.sort((a, b) =>
+    b.overdue - a.overdue || b.total - a.total
+  );
+
+  const memberRows = [
+    [
+      'STT',
+      'Nhân viên',
+      'Tổng công việc',
+      'Hoàn thành',
+      'Đúng hạn',
+      'Đang quá hạn',
+      'Tỷ lệ hoàn thành'
+    ]
+  ];
+
+  memberStats.forEach((m, index) => {
+    memberRows.push([
+      index + 1,
+      m.name,
+      m.total,
+      m.done,
+      m.onTime,
+      m.overdue,
+      m.percent + '%'
+    ]);
+  });
+
+  const detailRows = [
+    [
+      'STT',
+      'Tên công việc',
+      'Người phụ trách',
+      'Trạng thái',
+      'Ưu tiên',
+      'Ngày tạo',
+      'Deadline',
+      'Ngày hoàn thành'
+    ]
+  ];
+
+  tasks.forEach((task, index) => {
+    const assignee = (window.members || []).find(
+      m => m.id === task.assigneeId
+    );
+
+    let status = 'Chưa làm';
+    if (task.status === 'in_progress') status = 'Đang làm';
+    if (task.status === 'done') status = 'Hoàn thành';
+    if (isOverdue(task)) status = 'Quá hạn';
+
+    const priority = {
+      high: 'Cao',
+      medium: 'Trung bình',
+      low: 'Thấp'
+    }[task.priority] || '';
+
+    detailRows.push([
+      index + 1,
+      task.title || '',
+      assignee?.name || task.assigneeName || 'Chưa giao',
+      status,
+      priority,
+      task.createdAt ? new Date(task.createdAt).toLocaleString('vi-VN') : '',
+      task.deadline ? new Date(task.deadline).toLocaleString('vi-VN') : '',
+      task.completedAt ? new Date(task.completedAt).toLocaleString('vi-VN') : ''
+    ]);
+  });
+
+  const workbook = XLSX.utils.book_new();
+
+  const summarySheet = XLSX.utils.aoa_to_sheet(summaryRows);
+  summarySheet['!cols'] = [
+    { wch: 42 },
+    { wch: 25 }
+  ];
+
+  const memberSheet = XLSX.utils.aoa_to_sheet(memberRows);
+  memberSheet['!cols'] = [
+    { wch: 8 },
+    { wch: 25 },
+    { wch: 18 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 18 },
+    { wch: 20 }
+  ];
+  memberSheet['!autofilter'] = {
+    ref: memberSheet['!ref']
+  };
+
+  const detailSheet = XLSX.utils.aoa_to_sheet(detailRows);
+  detailSheet['!cols'] = [
+    { wch: 8 },
+    { wch: 40 },
+    { wch: 25 },
+    { wch: 18 },
+    { wch: 15 },
+    { wch: 22 },
+    { wch: 22 },
+    { wch: 22 }
+  ];
+  detailSheet['!autofilter'] = {
+    ref: detailSheet['!ref']
+  };
+
+  XLSX.utils.book_append_sheet(
+    workbook, summarySheet, 'Tong quan KPI'
+  );
+  XLSX.utils.book_append_sheet(
+    workbook, memberSheet, 'Hieu suat nhan vien'
+  );
+  XLSX.utils.book_append_sheet(
+    workbook, detailSheet, 'Chi tiet cong viec'
+  );
+
+  workbook.Props = {
+    Title: 'Báo cáo KPI CNC SUB 1P',
+    Subject: periodName,
+    Author: 'CNC SUB 1P'
+  };
+
+  XLSX.writeFile(
+    workbook,
+    'Bao_cao_KPI_CNC_SUB_1P_' +
+    now.toISOString().slice(0, 10) + '.xlsx'
+  );
+
+  window.showToast('Đã xuất báo cáo KPI Excel!', 'success');
+};
+
    window.exportFilteredTasks = function() {
   if (typeof XLSX === 'undefined') {
     window.showToast('Chưa tải được thư viện Excel!', 'error');
