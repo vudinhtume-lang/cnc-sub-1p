@@ -3264,6 +3264,30 @@ window.exportKPIReport = function() {
   filtered = filtered.filter(t =>
     isOverdue(t) && t.priority === 'high'
   );
+    } else if (window.filterStatus === 'aging') {
+  filtered = filtered.filter(t => {
+    if (t.status === 'done' || !t.createdAt || !t.deadline) {
+      return false;
+    }
+
+    const createdAt = t.createdAt?.toDate
+      ? t.createdAt.toDate()
+      : new Date(t.createdAt);
+
+    const deadline = new Date(t.deadline);
+    const now = new Date();
+
+    if (
+      isNaN(createdAt.getTime()) ||
+      isNaN(deadline.getTime()) ||
+      deadline <= createdAt ||
+      deadline <= now
+    ) {
+      return false;
+    }
+
+    return (now - createdAt) / (deadline - createdAt) >= 0.8;
+  });
 
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
@@ -3394,6 +3418,30 @@ window.exportKPIReport = function() {
   filtered = filtered.filter(t =>
     isOverdue(t) && t.priority === 'high'
   );
+ } else if (window.filterStatus === 'aging') {
+  filtered = filtered.filter(t => {
+    if (t.status === 'done' || !t.createdAt || !t.deadline) {
+      return false;
+    }
+
+    const createdAt = t.createdAt?.toDate
+      ? t.createdAt.toDate()
+      : new Date(t.createdAt);
+
+    const deadline = new Date(t.deadline);
+    const now = new Date();
+
+    if (
+      isNaN(createdAt.getTime()) ||
+      isNaN(deadline.getTime()) ||
+      deadline <= createdAt ||
+      deadline <= now
+    ) {
+      return false;
+    }
+
+    return (now - createdAt) / (deadline - createdAt) >= 0.8;
+  });       
 
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
