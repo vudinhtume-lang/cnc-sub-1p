@@ -2417,6 +2417,105 @@ const memberStats = subMembers.map(m => {
     }).join('');
 };
 
+window.renderKPIBottlenecks = function() {
+  const unfinishedEl = document.getElementById('bottleneck-unfinished');
+  const overdueEl = document.getElementById('bottleneck-overdue');
+  const statusEl = document.getElementById('bottleneck-status-list');
+  const memberEl = document.getElementById('bottleneck-member-list');
+  const oldestEl = document.getElementById('bottleneck-oldest-list');
+
+  if (!unfinishedEl || !statusEl || !memberEl || !oldestEl) return;
+
+  if (!window.loggedInUser) {
+    unfinishedEl.innerText = '0';
+    overdueEl.innerText = '0';
+    statusEl.innerHTML = '<p class="text-xs text-gray-400">Vui lòng đăng nhập.</p>';
+    memberEl.innerHTML = '';
+    oldestEl.innerHTML = '';
+    return;
+  }
+
+  const now = new Date();
+  const tasks = (window.tasks || []).filter(t => t.status !== 'done');
+  const overdueTasks = tasks.filter(t =>
+    t.deadline && new Date(t.deadline) < now
+  );
+
+  unfinishedEl.innerText = tasks.length;
+  overdueEl.innerText = overdueTasks.length;
+
+  const todoCount = tasks.filter(t => t.status === 'todo').length;
+  const progressCount = tasks.filter(t => t.status === 'in_progress').length;
+
+  statusEl.innerHTML = `
+    <div class="flex justify-between text-xs">
+      <span>Chưa làm</span>
+      <strong>${todoCount}</strong>
+    </div>
+    <div class="flex justify-between text-xs">
+      <span>Đang thực hiện</span>
+      <strong>${progressCount}</strong>
+    </div>
+  `;
+
+  const members = (window.members || []).filter(m => !m.isManager);
+
+  const memberStats = members.map(member => {
+    const memberTasks = tasks.filter(t => t.assigneeId === member.id);
+    const memberOverdue = memberTasks.filter(t =>
+      t.deadline && new Date(t.deadline) < now
+    ).length;
+
+    return {
+      name: member.name,
+      total: memberTasks.length,
+      overdue: memberOverdue
+    };
+  }).filter(m => m.total > 0);
+
+  memberStats.sort((a, b) =>
+    b.overdue - a.overdue || b.total - a.total
+  );
+
+  memberEl.innerHTML = memberStats.length
+    ? memberStats.slice(0, 5).map((m, i) => `
+        <div class="flex justify-between items-center gap-2 text-xs">
+          <span class="truncate">${i + 1}. ${String(m.name || '').replace(/[&<>"']/g, '')}</span>
+          <span class="shrink-0">
+            ${m.total} tồn đọng ·
+            <strong class="${m.overdue > 0 ? 'text-rose-600' : 'text-gray-500'}">
+              ${m.overdue} quá hạn
+            </strong>
+          </span>
+        </div>
+      `).join('')
+    : '<p class="text-xs text-gray-400">Không có nhiệm vụ tồn đọng.</p>';
+
+  const oldestTasks = tasks
+    .filter(t => t.createdAt)
+    .map(t => ({
+      task: t,
+      days: Math.max(0, Math.floor(
+        (now - new Date(t.createdAt)) / 86400000
+      ))
+    }))
+    .sort((a, b) => b.days - a.days)
+    .slice(0, 5);
+
+  oldestEl.innerHTML = oldestTasks.length
+    ? oldestTasks.map(item => `
+        <div class="border-b border-gray-100 dark:border-gray-700 pb-2">
+          <p class="text-xs font-semibold">
+            ${String(item.task.title || 'Nhiệm vụ không có tiêu đề').replace(/[&<>"']/g, '')}
+          </p>
+          <p class="text-[10px] text-gray-500 mt-1">
+            ${item.days} ngày chưa hoàn thành
+          </p>
+        </div>
+      `).join('')
+    : '<p class="text-xs text-gray-400">Chưa có dữ liệu nhiệm vụ.</p>';
+};
+
 window.exportKPIReport = function() {
   if (typeof XLSX === 'undefined') {
     window.showToast('Chưa tải được thư viện Excel!', 'error');
