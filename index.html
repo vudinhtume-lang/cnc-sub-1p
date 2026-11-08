@@ -1162,7 +1162,9 @@ const managerUid = choiceNumber === 0
   </div>
 
  
+
 <details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+
   <summary class="p-4 cursor-pointer flex items-center justify-between text-sm font-bold">
     <span>
       <i class="fa-solid fa-chart-pie text-indigo-500 mr-2"></i>
@@ -1170,34 +1172,39 @@ const managerUid = choiceNumber === 0
     </span>
     <i class="fa-solid fa-chevron-down text-gray-400"></i>
   </summary>
+
   <div class="p-3 space-y-4">
 
-  <div class="mb-3">
-    <h3 class="font-bold text-sm">Xu hướng công việc</h3>
-    <p class="text-[10px] text-gray-500 mt-1">
-      So sánh nhiệm vụ tạo mới và hoàn thành
-    </p>
-  </div>
+    <!-- BIỂU ĐỒ XU HƯỚNG -->
+    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3">
+      <div class="mb-3">
+        <h3 class="font-bold text-sm">Xu hướng công việc</h3>
+        <p class="text-[10px] text-gray-500 mt-1">
+          So sánh nhiệm vụ tạo mới và hoàn thành
+        </p>
+      </div>
 
-  <div class="flex items-center gap-4 mb-3 text-[10px]">
-    <div class="flex items-center gap-1">
-      <span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>
-      Nhiệm vụ tạo mới
-    </div>
-    <div class="flex items-center gap-1">
-      <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
-      Nhiệm vụ hoàn thành
-    </div>
-  </div>
+      <div class="flex items-center gap-4 mb-3 text-[10px]">
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>
+          Nhiệm vụ tạo mới
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
+          Nhiệm vụ hoàn thành
+        </div>
+      </div>
 
-  <div id="kpi-trend-chart" class="w-full min-h-[190px]">
-    <p class="text-xs text-gray-400 text-center py-10">
-      Đang chờ dữ liệu biểu đồ...
-    </p>
-  </div>
+      <div id="kpi-trend-chart" class="w-full min-h-[190px]">
+        <p class="text-xs text-gray-400 text-center py-10">
+          Đang chờ dữ liệu biểu đồ...
+        </p>
+      </div>
     </div>
-  
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-200 dark:border-amber-900 mb-4">
+
+    <!-- PHÂN TÍCH ĐIỂM NGHẼN -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-200 dark:border-amber-900">
+
       <div class="mb-3">
         <h3 class="font-bold text-sm">Phân tích điểm nghẽn</h3>
         <p class="text-[10px] text-gray-500 mt-1">
@@ -1243,15 +1250,22 @@ const managerUid = choiceNumber === 0
           </p>
         </div>
       </div>
+
     </div>
 
-    <h3 class="font-bold text-sm mb-3">Hiệu suất theo nhân viên</h3>
-    <div id="kpi-member-list" class="space-y-3">
-      <p class="text-xs text-gray-500 text-center py-4">
-        Đang chờ dữ liệu KPI...
-      </p>
+    <!-- XẾP HẠNG NHÂN VIÊN -->
+    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3">
+      <h3 class="font-bold text-sm mb-3">Hiệu suất theo nhân viên</h3>
+
+      <div id="kpi-member-list" class="space-y-3">
+        <p class="text-xs text-gray-500 text-center py-4">
+          Đang chờ dữ liệu KPI...
+        </p>
+      </div>
     </div>
+
   </div>
+</details>
 
 </section>
     <!-- TAB 5: SETTINGS & TEAM MANAGEMENT -->
