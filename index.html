@@ -2057,16 +2057,16 @@ window.renderManagementActionCenter = function() {
 
   const hasAgingHotspot =
     topAgingMember && topAgingMember.count >= 1;
-  const actions = [
+    const actions = [
     {
       priority: 1,
       status: 'overdue',
-           title: hasOverdueHotspot
+      title: hasOverdueHotspot
         ? `Ưu tiên xử lý: ${topOverdueMember.name} có nhiều việc quá hạn`
         : 'Xử lý công việc quá hạn',
       highlightName: hasOverdueHotspot
-  ? topOverdueMember.name
-  : '',
+        ? topOverdueMember.name
+        : '',
       advice: hasOverdueHotspot
         ? `${topOverdueMember.count} công việc quá hạn đang tập trung ở nhân viên này. Cần kiểm tra và hỗ trợ.`
         : 'Rà soát nguyên nhân chậm tiến độ và phân công người xử lý.',
@@ -2074,23 +2074,33 @@ window.renderManagementActionCenter = function() {
       color: 'rose'
     },
     {
-  priority: 2,
-  status: 'high_overdue',
-  title: 'Công việc ưu tiên Cao bị quá hạn',
-  advice: 'Cần ưu tiên xử lý ngay các nhiệm vụ có mức độ quan trọng cao.',
-  count: highOverdue,
-  color: 'rose'
-},
-{
-  priority: 3,
-  status: 'unacknowledged',
-  title: 'Nhắc nhân viên tiếp nhận',
-  advice: 'Kiểm tra các nhiệm vụ đang chờ nhân viên xác nhận.',
-  count: unacknowledged,
-  color: 'amber'
-},
+      priority: 2,
+      status: 'high_overdue',
+      title: 'Công việc ưu tiên Cao bị quá hạn',
+      advice: 'Cần ưu tiên xử lý ngay các nhiệm vụ có mức độ quan trọng cao.',
+      count: highOverdue,
+      color: 'rose'
+    },
+    {
+      priority: 3,
+      status: 'aging',
+      title: hasAgingHotspot
+        ? `Theo dõi: <span style="color:#e11d48;font-weight:900">${topAgingMember.name}</span> có công việc gần hết thời gian kế hoạch`
+        : 'Theo dõi công việc gần hết thời gian kế hoạch',
+      advice: `Có ${agingTasks.length} công việc đã sử dụng ít nhất 80% thời gian kế hoạch nhưng chưa hoàn thành.`,
+      count: agingTasks.length,
+      color: 'amber'
+    },
     {
       priority: 4,
+      status: 'unacknowledged',
+      title: 'Nhắc nhân viên tiếp nhận',
+      advice: 'Kiểm tra các nhiệm vụ đang chờ nhân viên xác nhận.',
+      count: unacknowledged,
+      color: 'amber'
+    },
+    {
+      priority: 5,
       status: 'upcoming',
       title: 'Chủ động xử lý việc sắp đến hạn',
       advice: 'Kiểm tra nguồn lực và tiến độ trong 24 giờ tới.',
@@ -2098,7 +2108,7 @@ window.renderManagementActionCenter = function() {
       color: 'indigo'
     },
     {
-      priority: 5,
+      priority: 6,
       status: 'unfinished',
       title: 'Theo dõi công việc tồn đọng',
       advice: 'Rà soát các nhiệm vụ chưa hoàn thành.',
