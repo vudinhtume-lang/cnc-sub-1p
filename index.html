@@ -3200,6 +3200,11 @@ window.exportKPIReport = function() {
   if (window.filterStatus === 'overdue') {
   filtered = filtered.filter(t => isOverdue(t));
 
+} else if (window.filterStatus === 'high_overdue') {
+  filtered = filtered.filter(t =>
+    isOverdue(t) && t.priority === 'high'
+  );
+
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
     !t.acknowledged && t.status !== 'done'
@@ -3207,12 +3212,16 @@ window.exportKPIReport = function() {
 
 } else if (window.filterStatus === 'upcoming') {
   const now = new Date();
-  const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const next24Hours = new Date(
+    now.getTime() + 24 * 60 * 60 * 1000
+  );
 
   filtered = filtered.filter(t => {
     if (t.status === 'done' || !t.deadline) return false;
     const deadline = new Date(t.deadline);
-    return deadline >= now && deadline <= next24Hours;
+    return !isNaN(deadline.getTime()) &&
+      deadline >= now &&
+      deadline <= next24Hours;
   });
 
 } else if (window.filterStatus === 'unfinished') {
@@ -3220,7 +3229,7 @@ window.exportKPIReport = function() {
 
 } else if (window.filterStatus !== 'all') {
   filtered = filtered.filter(t => t.status === window.filterStatus);
-  }
+   }
 
   if (assigneeVal !== 'all') {
     filtered = filtered.filter(t => t.assigneeId === assigneeVal);
@@ -3321,6 +3330,11 @@ window.exportKPIReport = function() {
       if (window.filterStatus === 'overdue') {
   filtered = filtered.filter(t => isOverdue(t));
 
+} else if (window.filterStatus === 'high_overdue') {
+  filtered = filtered.filter(t =>
+    isOverdue(t) && t.priority === 'high'
+  );
+
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
     !t.acknowledged && t.status !== 'done'
@@ -3328,12 +3342,16 @@ window.exportKPIReport = function() {
 
 } else if (window.filterStatus === 'upcoming') {
   const now = new Date();
-  const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const next24Hours = new Date(
+    now.getTime() + 24 * 60 * 60 * 1000
+  );
 
   filtered = filtered.filter(t => {
     if (t.status === 'done' || !t.deadline) return false;
     const deadline = new Date(t.deadline);
-    return deadline >= now && deadline <= next24Hours;
+    return !isNaN(deadline.getTime()) &&
+      deadline >= now &&
+      deadline <= next24Hours;
   });
 
 } else if (window.filterStatus === 'unfinished') {
@@ -3341,7 +3359,7 @@ window.exportKPIReport = function() {
 
 } else if (window.filterStatus !== 'all') {
   filtered = filtered.filter(t => t.status === window.filterStatus);
-      }
+        }
 
       if (assigneeVal !== 'all') {
         filtered = filtered.filter(t => t.assigneeId === assigneeVal);
