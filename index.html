@@ -3328,7 +3328,40 @@ window.exportKPIReport = function() {
 
     return (now - createdAt) / (deadline - createdAt) >= 0.8;
   });
+} else if (window.filterStatus === 'overload') {
+  const openForWorkload = filtered.filter(
+    t => t.status !== 'done'
+  );
 
+  const activeMembers = (window.members || []).filter(
+    m => !m.isManager && m.status === 'ACTIVE'
+  );
+
+  const averageWorkload = activeMembers.length > 0
+    ? openForWorkload.length / activeMembers.length
+    : 0;
+
+  const workloadByMember = activeMembers.map(member => ({
+    id: member.id,
+    count: openForWorkload.filter(
+      t => t.assigneeId === member.id
+    ).length
+  }));
+
+  const topMember = workloadByMember
+    .sort((a, b) => b.count - a.count)[0];
+
+  const hasOverload = topMember &&
+    topMember.count >= 3 &&
+    topMember.count >= averageWorkload * 1.5 &&
+    topMember.count >= averageWorkload + 2;
+
+  filtered = hasOverload
+    ? filtered.filter(t =>
+        t.assigneeId === topMember.id &&
+        t.status !== 'done'
+      )
+    : [];
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
     !t.acknowledged && t.status !== 'done'
@@ -3482,7 +3515,40 @@ window.exportKPIReport = function() {
 
     return (now - createdAt) / (deadline - createdAt) >= 0.8;
   });       
+} else if (window.filterStatus === 'overload') {
+  const openForWorkload = filtered.filter(
+    t => t.status !== 'done'
+  );
 
+  const activeMembers = (window.members || []).filter(
+    m => !m.isManager && m.status === 'ACTIVE'
+  );
+
+  const averageWorkload = activeMembers.length > 0
+    ? openForWorkload.length / activeMembers.length
+    : 0;
+
+  const workloadByMember = activeMembers.map(member => ({
+    id: member.id,
+    count: openForWorkload.filter(
+      t => t.assigneeId === member.id
+    ).length
+  }));
+
+  const topMember = workloadByMember
+    .sort((a, b) => b.count - a.count)[0];
+
+  const hasOverload = topMember &&
+    topMember.count >= 3 &&
+    topMember.count >= averageWorkload * 1.5 &&
+    topMember.count >= averageWorkload + 2;
+
+  filtered = hasOverload
+    ? filtered.filter(t =>
+        t.assigneeId === topMember.id &&
+        t.status !== 'done'
+      )
+    : [];
 } else if (window.filterStatus === 'unacknowledged') {
   filtered = filtered.filter(t =>
     !t.acknowledged && t.status !== 'done'
