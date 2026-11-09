@@ -4264,19 +4264,41 @@ window.switchTab('tasks');
     );
   }
 };
-    window.deleteTask = function(taskId) {
-      if (!window.loggedInUser || !window.loggedInUser.isManager) {
-        window.showToast('Chỉ Quản lý Tổng mới có quyền xóa task!', 'warning');
-        return;
-      }
+   window.canManageTask = function(task) {
+  const user = window.loggedInUser;
 
-      window.tasks = window.tasks.filter(t => t.id !== taskId);
-      saveData();
-      deleteTaskFromCloud(taskId);
-      window.renderAll();
-      window.closeTaskDetailModal();
-      window.showToast('Đã xóa task!', 'warning');
-    }
+  if (!user || !task) return false;
+
+  // Admin có toàn quyền
+  if (user.isManager === true) return true;
+
+  // Manager chỉ quản lý task do chính mình tạo
+  return user.role === 'MANAGER'
+    && task.createdBy === user.uid;
+};
+
+window.deleteTask = async function(taskId) {
+  const task = window.tasks.find(t => t.id === taskId);
+
+  if (!window.canManageTask(task)) {
+    window.showToast('Bạn chỉ được xóa task do chính mình tạo!', 'warning');
+    return;
+  }
+
+  try {
+    await window.cncDeleteTask(taskId);
+
+    window.tasks = window.tasks.filter(t => t.id !== taskId);
+    saveData();
+    window.renderAll();
+    window.closeTaskDetailModal();
+
+    window.showToast('Đã xóa task!', 'success');
+  } catch (error) {
+    console.error('Lỗi xóa task:', error);
+    window.showToast('Không thể xóa task: ' + error.message, 'error');
+  }
+};
 
     window.openTaskDetailModal = function(taskId) {
       window.currentDetailTaskId = taskId;
