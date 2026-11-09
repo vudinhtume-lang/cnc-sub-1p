@@ -4358,9 +4358,11 @@ if (window.canManageTask(task)) {
     }
 
     window.editTask = function(taskId) {
-      if (!window.loggedInUser || !window.loggedInUser.isManager) return;
-
       const task = window.tasks.find(t => t.id === taskId);
+if (!window.canManageTask(task)) {
+  window.showToast('Bạn chỉ được sửa task do chính mình tạo!', 'warning');
+  return;
+}
       if (!task) return;
       window.switchTab('add-task');
       document.getElementById('task-id-input').value = task.id;
