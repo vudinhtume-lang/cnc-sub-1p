@@ -4334,18 +4334,21 @@ window.deleteTask = async function(taskId) {
       `;
 
       const adminActions = document.getElementById('modal-admin-actions');
-      if (window.loggedInUser && window.loggedInUser.isManager) {
-        adminActions.style.display = 'flex';
-        document.getElementById('modal-edit-btn').onclick = () => {
-          window.closeTaskDetailModal();
-          window.editTask(task.id);
-        };
-        document.getElementById('modal-delete-btn').onclick = () => {
-          window.deleteTask(task.id);
-        };
-      } else {
-        adminActions.style.display = 'none';
-      }
+
+if (window.canManageTask(task)) {
+  adminActions.style.display = 'flex';
+
+  document.getElementById('modal-edit-btn').onclick = () => {
+    window.closeTaskDetailModal();
+    window.editTask(task.id);
+  };
+
+  document.getElementById('modal-delete-btn').onclick = () => {
+    window.deleteTask(task.id);
+  };
+} else {
+  adminActions.style.display = 'none';
+}
 
       document.getElementById('task-detail-modal').classList.remove('hidden');
     }
