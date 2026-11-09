@@ -4037,8 +4037,19 @@ let changedFields = [];
       if (id) {
   const idx = window.tasks.findIndex(t => t.id === id);
 
-  if (idx !== -1) {
-    const oldTask = window.tasks[idx];
+  if (idx === -1) {
+    window.showToast('Không tìm thấy task cần sửa!', 'warning');
+    return;
+  }
+
+  const oldTask = window.tasks[idx];
+
+  if (!window.canManageTask(oldTask)) {
+    window.showToast('Bạn không có quyền sửa task này!', 'warning');
+    return;
+  }
+
+        {
     changedFields = [];
 
     const oldAssignee = window.members.find(
