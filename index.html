@@ -4018,9 +4018,10 @@ window.renderTaskUpdateNotifications = function() {
     window.handleTaskFormSubmit = async function(e) {
       e.preventDefault();
       
-      if (!window.loggedInUser || !window.loggedInUser.isManager) {
-        window.showToast('Chỉ Quản lý Tổng mới có quyền phân công task mới!', 'warning');
-        window.openRoleModal();
+            const member = window.loggedInUser;
+
+      if (!member || (member.role !== 'MANAGER' && member.isManager !== true)) {
+        window.showToast('Tài khoản không có quyền phân công task.', 'warning');
         return;
       }
 
