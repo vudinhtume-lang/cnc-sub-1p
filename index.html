@@ -85,7 +85,39 @@
   window._usersUnsubscribe = null;
     }
     function profileToMember(uid, data) {
-      return { id: uid, uid, username: data.username || '', name: data.displayName || '', role: data.role || 'MANAGER', title: data.title || '', status: data.status || 'ACTIVE', managerUid: data.managerUid || '', isManager: uid === ADMIN_UID };
+  const managerUid = data.managerUid || '';
+
+  return {
+    id: uid,
+    uid,
+    username: data.username || '',
+    name: data.displayName || '',
+    role: data.role || 'MANAGER',
+    title: data.title || '',
+    status: data.status || 'ACTIVE',
+
+    // Cấu trúc tổ chức nhiều cấp
+    orgLevel: data.orgLevel || (
+      uid === ADMIN_UID
+        ? 'ADMIN'
+        : data.role === 'MANAGER'
+          ? 'MANAGER'
+          : 'EMPLOYEE'
+    ),
+
+    parentUid: data.parentUid || managerUid,
+
+    managerUid,
+
+    managerUids: Array.isArray(data.managerUids)
+      ? data.managerUids
+      : (managerUid ? [managerUid] : []),
+
+    canAssignTasks: data.canAssignTasks === true
+      || data.role === 'MANAGER',
+
+    isManager: uid === ADMIN_UID
+  };
     }
       async function loadProfile(user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
