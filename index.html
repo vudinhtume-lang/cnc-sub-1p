@@ -496,13 +496,77 @@ if (
 const managerUid = choiceNumber === 0
   ? ''
   : managerOptions[choiceNumber - 1].uid;
-      const role = prompt('Nhập quyền MANAGER hoặc USER:', target.role);
-      if (role === null) return;
+      const role = prompt(
+  'Nhập quyền MANAGER hoặc USER:',
+  target.role
+);
 
-      const newRole = role.trim().toUpperCase();
-      if (!['MANAGER', 'USER'].includes(newRole)) {
-        return window.showToast('Chỉ được chọn MANAGER hoặc USER.', 'warning');
-      }
+if (role === null) return;
+
+const newRole = role.trim().toUpperCase();
+
+if (!['MANAGER', 'USER'].includes(newRole)) {
+  return window.showToast(
+    'Chỉ được chọn MANAGER hoặc USER.',
+    'warning'
+  );
+}
+
+const levelOptions = [
+  'LEADER',
+  'SHIFT',
+  'LINE',
+  'SUB_LD',
+  'EMPLOYEE'
+];
+
+const levelLabels = [
+  '0. Leader',
+  '1. Shift',
+  '2. Line',
+  '3. Sub LD',
+  '4. Nhân viên'
+].join('\n');
+
+const currentLevel = levelOptions.indexOf(
+  target.orgLevel || (
+    newRole === 'MANAGER' ? 'LEADER' : 'EMPLOYEE'
+  )
+);
+
+const levelChoice = prompt(
+  'CHỌN CẤP TỔ CHỨC\n\n' +
+  levelLabels +
+  '\n\nNhập số lựa chọn:',
+  String(currentLevel >= 0 ? currentLevel : 4)
+);
+
+if (levelChoice === null) return;
+
+const levelIndex = Number(levelChoice);
+
+if (
+  !/^\d$/.test(levelChoice.trim()) ||
+  levelIndex < 0 ||
+  levelIndex > 4
+) {
+  return window.showToast(
+    'Cấp tổ chức không hợp lệ.',
+    'warning'
+  );
+}
+
+const orgLevel = levelOptions[levelIndex];
+
+if (
+  orgLevel !== 'EMPLOYEE' &&
+  newRole !== 'MANAGER'
+) {
+  return window.showToast(
+    'Các cấp quản lý phải có quyền MANAGER.',
+    'warning'
+  );
+                          }
 
       try {
         await updateDoc(doc(db, 'users', uid), {
