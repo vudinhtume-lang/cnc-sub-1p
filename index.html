@@ -569,11 +569,14 @@ if (
                           }
 
       try {
-                await updateDoc(doc(db, 'users', uid), {
+                        await updateDoc(doc(db, 'users', uid), {
           displayName: name.trim(),
           title: title.trim(),
           managerUid: managerUid.trim(),
+          parentUid: managerUid.trim(),
           role: newRole,
+          orgLevel,
+          canAssignTasks: orgLevel !== 'EMPLOYEE',
           updatedAt: new Date().toISOString(),
           updatedBy: ADMIN_UID
         });
