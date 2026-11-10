@@ -123,6 +123,60 @@
     isManager: uid === ADMIN_UID
   };
     }
+    
+function buildManagerScopes(users) {
+  const usersByUid = new Map(
+    users.map(user => [user.uid, user])
+  );
+
+  return users.map(user => {
+    const managerUids = new Set();
+    const visited = new Set([user.uid]);
+
+    let current = user;
+
+    while (current) {
+      // Quyền giao việc bổ sung được kế thừa xuống cấp dưới
+      (current.additionalManagerUids || []).forEach(uid => {
+        const manager = usersByUid.get(uid);
+
+        if (
+          manager &&
+          manager.status === 'ACTIVE' &&
+          (manager.canAssignTasks || manager.isManager)
+        ) {
+          managerUids.add(uid);
+        }
+      });
+
+      const parentUid =
+        current.parentUid || current.managerUid || '';
+
+      if (!parentUid || visited.has(parentUid)) break;
+
+      visited.add(parentUid);
+
+      const parent = usersByUid.get(parentUid);
+
+      if (!parent) break;
+
+      if (
+        parent.status === 'ACTIVE' &&
+        (parent.canAssignTasks || parent.isManager)
+      ) {
+        managerUids.add(parent.uid);
+      }
+
+      current = parent;
+    }
+
+    return {
+      ...user,
+      managerUids: Array.from(managerUids)
+    };
+  });
+}
+
       async function loadProfile(user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (!snap.exists()) throw new Error('Tài khoản đã xác thực nhưng chưa có hồ sơ trong Firestore. Nhờ Admin tạo hồ sơ users trước.');
@@ -170,9 +224,11 @@ function startDataListeners(member) {
     window._usersUnsubscribe = onSnapshot(
       collection(db, 'users'),
       (snapshot) => {
-        window.managedUsers = snapshot.docs.map(
-          d => profileToMember(d.id, d.data())
-        );
+        window.managedUsers = buildManagerScopes(
+  snapshot.docs.map(
+    d => profileToMember(d.id, d.data())
+  )
+);
 
         window.members = window.managedUsers.filter(
           m => m.status === 'ACTIVE'
