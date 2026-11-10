@@ -1690,6 +1690,24 @@ if (orgLevel !== 'LEADER') {
           </button>
           <p class="text-[10px] text-gray-500 leading-relaxed">Tên đăng nhập là họ tên không dấu, ví dụ: Phạm Thị Cúc → pham.thi.cuc. Nhân viên đăng nhập bằng họ tên và mật khẩu được cấp.</p>
         </div>
+        
+<div class="mt-4 p-3 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+  <p class="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">
+    Đồng bộ phân quyền quản lý
+  </p>
+  <p class="text-[10px] text-gray-600 dark:text-gray-300 mb-2">
+    Cập nhật quyền quản lý kế thừa và quyền quản lý bổ sung cho toàn bộ nhân sự.
+  </p>
+  <button
+    id="sync-manager-scopes-btn"
+    type="button"
+    onclick="window.cncSyncManagerScopes()"
+    class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold"
+  >
+    ĐỒNG BỘ QUYỀN QUẢN LÝ
+  </button>
+</div>
+
         <div class="border-t border-gray-100 dark:border-gray-700 mt-4 pt-3">
           <div class="flex items-center justify-between mb-2">
             <p class="text-xs font-semibold">Danh sách tài khoản</p>
