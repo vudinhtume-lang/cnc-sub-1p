@@ -122,6 +122,7 @@
   };
     }
     
+
 function buildManagerScopes(users) {
   const usersByUid = new Map(
     users.map(user => [user.uid, user])
@@ -129,44 +130,54 @@ function buildManagerScopes(users) {
 
   return users.map(user => {
     const managerUids = new Set();
-    const visited = new Set([user.uid]);
+    const visited = new Set();
 
-    let current = user;
+    function collectScope(profile) {
+      if (!profile || visited.has(profile.uid)) return;
 
-    while (current) {
-      // Quyền giao việc bổ sung được kế thừa xuống cấp dưới
-      (current.additionalManagerUids || []).forEach(uid => {
-        const manager = usersByUid.get(uid);
+      visited.add(profile.uid);
 
-        if (
-          manager &&
-          manager.status === 'ACTIVE' &&
-          (manager.canAssignTasks || manager.isManager)
-        ) {
-          managerUids.add(uid);
+      const canAssign =
+        profile.isManager ||
+        (
+          profile.role === 'MANAGER' &&
+          profile.canAssignTasks === true
+        );
+
+      if (
+        profile.uid !== user.uid &&
+        profile.status === 'ACTIVE' &&
+        canAssign
+      ) {
+        managerUids.add(profile.uid);
+      }
+
+      // Thu thập các quyền quản lý bổ sung
+      (profile.additionalManagerUids || []).forEach(extraUid => {
+        const extraManager = usersByUid.get(extraUid);
+
+        if (extraManager) {
+          collectScope(extraManager);
         }
       });
 
+      // Thu thập cấp quản lý trực tiếp phía trên
       const parentUid =
-        current.parentUid || current.managerUid || '';
+        profile.parentUid || profile.managerUid || '';
 
-      if (!parentUid || visited.has(parentUid)) break;
+      const parent = parentUid
+        ? usersByUid.get(parentUid)
+        : null;
 
-      visited.add(parentUid);
-
-      const parent = usersByUid.get(parentUid);
-
-      if (!parent) break;
-
-      if (
-        parent.status === 'ACTIVE' &&
-        (parent.canAssignTasks || parent.isManager)
-      ) {
-        managerUids.add(parent.uid);
+      if (parent) {
+        collectScope(parent);
       }
-
-      current = parent;
     }
+
+    collectScope(user);
+
+    // Không cho phép người dùng tự quản lý chính mình
+    managerUids.delete(user.uid);
 
     return {
       ...user,
@@ -174,6 +185,7 @@ function buildManagerScopes(users) {
     };
   });
 }
+
 
 async function syncManagerScopes(users) {
   if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) {
