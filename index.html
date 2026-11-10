@@ -496,6 +496,32 @@ if (
 const managerUid = choiceNumber === 0
   ? ''
   : managerOptions[choiceNumber - 1].uid;
+      // Kiểm tra không cho chọn cấp dưới làm quản lý cấp trên
+if (managerUid) {
+  const usersByUid = new Map(
+    (window.managedUsers || []).map(u => [u.uid, u])
+  );
+
+  let currentUid = managerUid;
+  const visited = new Set();
+
+  while (currentUid && !visited.has(currentUid)) {
+    if (currentUid === uid) {
+      return window.showToast(
+        'Không thể chọn cấp dưới làm quản lý trực tiếp. Thao tác này tạo vòng lặp tổ chức!',
+        'warning'
+      );
+    }
+
+    visited.add(currentUid);
+
+    const currentUser = usersByUid.get(currentUid);
+
+    currentUid = currentUser
+      ? (currentUser.parentUid || currentUser.managerUid || '')
+      : '';
+  }
+}
       const role = prompt(
   'Nhập quyền MANAGER hoặc USER:',
   target.role
