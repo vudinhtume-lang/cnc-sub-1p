@@ -421,7 +421,84 @@ for (let i = 0; i < reportIds.length; i += 30) {
       })[ch]);
     }
 
-    
+ 
+window.cncSyncManagerScopes = async () => {
+  if (
+    !window.loggedInUser?.isManager ||
+    !auth.currentUser ||
+    auth.currentUser.uid !== ADMIN_UID
+  ) {
+    window.showToast?.(
+      'Chỉ Admin mới được đồng bộ quyền quản lý.',
+      'warning'
+    );
+    return;
+  }
+
+  const users = window.managedUsers || [];
+
+  if (!users.length) {
+    window.showToast?.(
+      'Chưa có dữ liệu nhân sự để đồng bộ.',
+      'warning'
+    );
+    return;
+  }
+
+  const preview = buildManagerScopes(users);
+
+  const totalLinks = preview.reduce(
+    (sum, user) => sum + user.managerUids.length,
+    0
+  );
+
+  const confirmed = window.confirm(
+    'XÁC NHẬN ĐỒNG BỘ QUYỀN QUẢN LÝ\n\n' +
+    `Số hồ sơ nhân sự: ${users.length}\n` +
+    `Số liên kết quyền quản lý: ${totalLinks}\n\n` +
+    'Hệ thống sẽ cập nhật managerUids cho các hồ sơ trên Firestore. Tiếp tục?'
+  );
+
+  if (!confirmed) return;
+
+  const btn = document.getElementById(
+    'sync-manager-scopes-btn'
+  );
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'ĐANG ĐỒNG BỘ...';
+  }
+
+  try {
+    const syncedUsers = await syncManagerScopes(users);
+
+    window.managedUsers = syncedUsers;
+    window.members = syncedUsers.filter(
+      user => user.status === 'ACTIVE'
+    );
+
+    renderManagedUsers();
+
+    window.showToast?.(
+      `Đã đồng bộ quyền quản lý cho ${syncedUsers.length} hồ sơ.`,
+      'success'
+    );
+  } catch (error) {
+    console.error('Sync manager scopes:', error);
+
+    window.showToast?.(
+      'Đồng bộ thất bại: ' + error.message,
+      'warning'
+    );
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'ĐỒNG BỘ QUYỀN QUẢN LÝ';
+    }
+  }
+};
+   
 function renderManagedUsers() {
   const panel = document.getElementById('admin-account-panel');
   const host = document.getElementById('managed-users-list');
