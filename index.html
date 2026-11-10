@@ -176,6 +176,31 @@ function buildManagerScopes(users) {
   });
 }
 
+async function syncManagerScopes(users) {
+  if (!auth.currentUser || auth.currentUser.uid !== ADMIN_UID) {
+    throw new Error('Chỉ Admin mới được đồng bộ quyền quản lý.');
+  }
+
+  const scopedUsers = buildManagerScopes(users);
+
+  for (let i = 0; i < scopedUsers.length; i += 450) {
+    const batch = writeBatch(db);
+    const group = scopedUsers.slice(i, i + 450);
+
+    group.forEach(user => {
+      batch.update(doc(db, 'users', user.uid), {
+        managerUids: user.managerUids || [],
+        scopeUpdatedAt: new Date().toISOString(),
+        scopeUpdatedBy: ADMIN_UID
+      });
+    });
+
+    await batch.commit();
+  }
+
+  return scopedUsers;
+}
+
       async function loadProfile(user) {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (!snap.exists()) throw new Error('Tài khoản đã xác thực nhưng chưa có hồ sơ trong Firestore. Nhờ Admin tạo hồ sơ users trước.');
