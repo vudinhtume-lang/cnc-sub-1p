@@ -109,9 +109,13 @@
 
     managerUid,
 
-    managerUids: Array.isArray(data.managerUids)
+        managerUids: Array.isArray(data.managerUids)
       ? data.managerUids
       : (managerUid ? [managerUid] : []),
+
+    additionalManagerUids: Array.isArray(data.additionalManagerUids)
+      ? data.additionalManagerUids
+      : [],
 
     canAssignTasks: data.canAssignTasks === true
       || data.role === 'MANAGER',
@@ -593,7 +597,73 @@ if (
     'warning'
   );
                           }
+// Chọn thêm Leader được phép giao việc chéo
+let additionalManagerUids = [];
 
+if (orgLevel !== 'LEADER') {
+  const leaderOptions = (window.managedUsers || [])
+    .filter(u =>
+      u.uid !== uid &&
+      u.uid !== managerUid &&
+      u.role === 'MANAGER' &&
+      u.status === 'ACTIVE' &&
+      (u.orgLevel === 'LEADER' || u.orgLevel === 'MANAGER')
+    );
+
+  if (leaderOptions.length) {
+    const leaderList = leaderOptions
+      .map((u, i) => `${i + 1}. ${u.name}`)
+      .join('\n');
+
+    const currentSelected = leaderOptions
+      .map((u, i) =>
+        (target.additionalManagerUids || []).includes(u.uid)
+          ? String(i + 1)
+          : null
+      )
+      .filter(Boolean)
+      .join(',');
+
+    const extraChoice = prompt(
+      'CHỌN LEADER ĐƯỢC PHÉP GIAO VIỆC BỔ SUNG\n\n' +
+      leaderList +
+      '\n\nNhập số, cách nhau bằng dấu phẩy.\n' +
+      'Để trống nếu không chọn:',
+      currentSelected
+    );
+
+    if (extraChoice === null) return;
+
+    const values = extraChoice
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+
+    for (const value of values) {
+      if (!/^\d+$/.test(value)) {
+        return window.showToast(
+          'Danh sách Leader không hợp lệ.',
+          'warning'
+        );
+      }
+
+      const index = Number(value) - 1;
+
+      if (index < 0 || index >= leaderOptions.length) {
+        return window.showToast(
+          'Số lựa chọn Leader không hợp lệ.',
+          'warning'
+        );
+      }
+
+      const selectedUid = leaderOptions[index].uid;
+
+      if (!additionalManagerUids.includes(selectedUid)) {
+        additionalManagerUids.push(selectedUid);
+      }
+    }
+  }
+    }
       try {
                         await updateDoc(doc(db, 'users', uid), {
           displayName: name.trim(),
