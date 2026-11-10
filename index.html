@@ -569,7 +569,7 @@ if (
                           }
 
       try {
-        await updateDoc(doc(db, 'users', uid), {
+                await updateDoc(doc(db, 'users', uid), {
           displayName: name.trim(),
           title: title.trim(),
           managerUid: managerUid.trim(),
