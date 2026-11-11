@@ -3393,8 +3393,8 @@ window.renderExecutiveOverview = function() {
     ? `${issues[0].label}: ${issues[0].count}`
     : 'Không có tồn đọng';
 
+  
   if (previousStart) {
-    if (previousStart) {
     const previousDone = previousTasks.filter(
       t => t.status === 'done'
     ).length;
@@ -3424,16 +3424,21 @@ window.renderExecutiveOverview = function() {
       isInPeriod(t.completedAt, previousStart, previousEnd)
     ).length;
 
+    const now = new Date();
+
     const countMissedDeadlines = (from, to) =>
       tasks.filter(t => {
         if (!isInPeriod(t.deadline, from, to)) return false;
 
         const deadline = new Date(t.deadline);
 
-        if (t.status !== 'done') return true;
+        if (t.status !== 'done') return deadline < now;
         if (!t.completedAt) return false;
 
-        return new Date(t.completedAt) > deadline;
+        const completedAt = new Date(t.completedAt);
+
+        return !isNaN(completedAt.getTime()) &&
+          completedAt > deadline;
       }).length;
 
     const currentLate = countMissedDeadlines(start, end);
@@ -3462,7 +3467,7 @@ window.renderExecutiveOverview = function() {
 
   } else {
     compareEl.innerText = 'Toàn thời gian · Không áp dụng so sánh kỳ trước.';
-    }
+  }
 
   if (currentTasks.length === 0) {
     insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
