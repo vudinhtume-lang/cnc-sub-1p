@@ -4082,6 +4082,21 @@ window.exportKPIReport = function() {
       }
 
             const resultCountEl = document.getElementById('tasks-result-count');
+            // SORT TASKS BY DEADLINE: nearest first
+      filtered.sort((a, b) => {
+        const dateA = a.deadline
+          ? new Date(a.deadline).getTime()
+          : Infinity;
+
+        const dateB = b.deadline
+          ? new Date(b.deadline).getTime()
+          : Infinity;
+
+        const validA = Number.isFinite(dateA) ? dateA : Infinity;
+        const validB = Number.isFinite(dateB) ? dateB : Infinity;
+
+        return validA - validB;
+      });
       if (resultCountEl) {
         resultCountEl.innerText = `Đang hiển thị ${filtered.length} công việc`;
       }
