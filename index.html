@@ -3457,33 +3457,49 @@ window.renderExecutiveOverview = function() {
       return `${arrow} ${Math.abs(change)}% (${current}/${previous})`;
     };
 
-        compareEl.innerHTML = `
-      <div class="grid grid-cols-2 gap-x-3 gap-y-3">
-        <div>
-          <div class="text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</div>
+            const trendColor = (current, previous, increaseIsGood) => {
+      if (current === previous) {
+        return 'text-gray-600 dark:text-gray-400';
+      }
+
+      return (current > previous) === increaseIsGood
+        ? 'text-blue-600 dark:text-blue-400'
+        : 'text-red-600 dark:text-red-400';
+    };
+
+    const rateColor = delta > 0
+      ? 'text-blue-600 dark:text-blue-400'
+      : delta < 0
+        ? 'text-red-600 dark:text-red-400'
+        : 'text-gray-600 dark:text-gray-400';
+
+    compareEl.innerHTML = `
+      <span class="grid grid-cols-2 gap-x-3 gap-y-2">
+        <span class="block">
+          <span class="block text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</span>
           <strong class="${rateColor}">
             ${direction} ${Math.abs(delta)} điểm %
           </strong>
-        </div>
-        <div>
-          <div class="text-gray-500 dark:text-gray-400">Tạo mới</div>
+        </span>
+        <span class="block">
+          <span class="block text-gray-500 dark:text-gray-400">Tạo mới</span>
           <strong class="text-gray-600 dark:text-gray-400">
             ${formatTrend(currentCreated, previousCreated)}
           </strong>
-        </div>
-        <div>
-          <div class="text-gray-500 dark:text-gray-400">Hoàn thành</div>
+        </span>
+        <span class="block">
+          <span class="block text-gray-500 dark:text-gray-400">Hoàn thành</span>
           <strong class="${trendColor(currentCompleted, previousCompleted, true)}">
             ${formatTrend(currentCompleted, previousCompleted)}
           </strong>
-        </div>
-        <div>
-          <div class="text-gray-500 dark:text-gray-400">Trễ hạn</div>
+        </span>
+        <span class="block">
+          <span class="block text-gray-500 dark:text-gray-400">Trễ hạn</span>
           <strong class="${trendColor(currentLate, previousLate, false)}">
             ${formatTrend(currentLate, previousLate)}
           </strong>
-        </div>
-      </div>
+        </span>
+      </span>
     `;
 
   } else {
