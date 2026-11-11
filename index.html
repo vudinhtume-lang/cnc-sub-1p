@@ -3792,8 +3792,13 @@ window.renderExecutiveOverview = function() {
     `;
 
     
+    
     const departmentCards = departmentList.map(dept => {
-      const deptTasks = tasks.filter(t => t.department === dept.id);
+      const deptTasks = tasks.filter(t =>
+        t.department === dept.id &&
+        t.commonIssue !== true
+      );
+
       return renderDepartmentCard(
         dept.name,
         getDepartmentStats(deptTasks)
@@ -3804,9 +3809,14 @@ window.renderExecutiveOverview = function() {
 
     const commonDepartments = new Set();
 
+    
     commonTasks.forEach(t => {
-      if (t.department) commonDepartments.add(t.department);
+      // Tương thích dữ liệu Vấn đề chung cũ
+      if (t.department) {
+        commonDepartments.add(t.department);
+      }
 
+      // Danh sách bộ phận tham gia theo cấu trúc mới
       if (Array.isArray(t.relatedDepartments)) {
         t.relatedDepartments.forEach(dept => {
           if (dept) commonDepartments.add(dept);
