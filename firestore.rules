@@ -19,8 +19,33 @@ function hasActiveProfile() {
   return isActiveUser();
 }
     function validTaskStatus() {
-      return request.resource.data.status in ['todo', 'in_progress', 'done'];
-    }
+  return request.resource.data.status in ['todo', 'in_progress', 'done'];
+}
+
+function canAssignTaskTo(assigneeId) {
+  return isActiveUser()
+    && get(
+      /databases/$(database)/documents/users/$(request.auth.uid)
+    ).data.role == 'MANAGER'
+    && get(
+      /databases/$(database)/documents/users/$(request.auth.uid)
+    ).data.get('canAssignTasks', true) != false
+    && exists(
+      /databases/$(database)/documents/users/$(assigneeId)
+    )
+    && get(
+      /databases/$(database)/documents/users/$(assigneeId)
+    ).data.status == 'ACTIVE'
+    && (
+      get(
+        /databases/$(database)/documents/users/$(assigneeId)
+      ).data.get('managerUid', '') == request.auth.uid
+      ||
+      request.auth.uid in get(
+        /databases/$(database)/documents/users/$(assigneeId)
+      ).data.get('managerUids', [])
+    );
+}
 
     match /users/{userId} {
       allow get: if signedIn()
