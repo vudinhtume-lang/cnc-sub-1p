@@ -75,44 +75,66 @@ function canAssignTaskTo(assigneeId) {
  match /tasks/{taskId} {
   allow read: if isActiveUser();
 
-  allow create, delete: if isAdmin();
+  // Tạo task: Admin hoặc Manager giao đúng phạm vi
+  allow create: if isAdmin()
+    || (
+      canAssignTaskTo(request.resource.data.assigneeId)
+      && request.resource.data.createdBy == request.auth.uid
+    );
 
-  allow update: if isAdmin() || (
-    isActiveUser()
-    && resource.data.assigneeId == request.auth.uid
-    && request.resource.data.diff(resource.data).affectedKeys()
-      .hasOnly([
-        'status',
-        'acknowledged',
-        'acknowledgedAt',
-        'updateAcknowledged',
-        'updateAcknowledgedAt',
-        'updateAcknowledgedBy'
-      ])
-    && (
-      !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['status'])
-      || validTaskStatus()
+  // Xóa task: Admin hoặc chính Manager đã tạo
+  allow delete: if isAdmin()
+    || (
+      isActiveUser()
+      && resource.data.createdBy == request.auth.uid
+      && get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data.role == 'MANAGER'
+    );
+
+  // Sửa task: Admin, Manager tạo task hoặc nhân viên cập nhật trạng thái
+  allow update: if isAdmin()
+    || (
+      canAssignTaskTo(request.resource.data.assigneeId)
+      && resource.data.createdBy == request.auth.uid
+      && request.resource.data.createdBy == resource.data.createdBy
     )
-    && (
-      !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny(['acknowledged'])
-      || request.resource.data.acknowledged == true
-    )
-    && (
-      !request.resource.data.diff(resource.data).affectedKeys()
-        .hasAny([
+    || (
+      isActiveUser()
+      && resource.data.assigneeId == request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly([
+          'status',
+          'acknowledged',
+          'acknowledgedAt',
           'updateAcknowledged',
           'updateAcknowledgedAt',
           'updateAcknowledgedBy'
         ])
-      || (
-        request.resource.data.updateAcknowledged == true
-        && request.resource.data.updateAcknowledgedBy == request.auth.uid
-        && request.resource.data.updateAcknowledgedAt is string
+      && (
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['status'])
+        || validTaskStatus()
       )
-    )
-  );
+      && (
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['acknowledged'])
+        || request.resource.data.acknowledged == true
+      )
+      && (
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny([
+            'updateAcknowledged',
+            'updateAcknowledgedAt',
+            'updateAcknowledgedBy'
+          ])
+        || (
+          request.resource.data.updateAcknowledged == true
+          && request.resource.data.updateAcknowledgedBy == request.auth.uid
+          && request.resource.data.updateAcknowledgedAt is string
+        )
+      )
+    );
 }
 
 match /task_history/{historyId} {
