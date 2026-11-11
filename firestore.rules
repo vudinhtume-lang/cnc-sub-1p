@@ -15,7 +15,9 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ACTIVE';
     }
-
+function hasActiveProfile() {
+  return isActiveUser();
+}
     function validTaskStatus() {
       return request.resource.data.status in ['todo', 'in_progress', 'done'];
     }
@@ -26,7 +28,13 @@ service cloud.firestore {
       allow list: if isAdmin()
   || (
     signedIn()
-    && resource.data.managerUid == request.auth.uid
+    && (
+      resource.data.managerUid == request.auth.uid
+      || (
+        'managerUids' in resource.data
+        && request.auth.uid in resource.data.managerUids
+      )
+    )
   );
 
       allow create, update: if isAdmin()
