@@ -5416,27 +5416,29 @@ if (!window.canManageTask(task)) {
       document.getElementById('task-priority-input').value = task.priority;
       document.getElementById('task-deadline-input').value = task.deadline;
       document.getElementById('task-desc-input').value = task.desc || '';
+      
+      const isCommonIssue = !!task.commonIssue;
+
       document.getElementById('task-department-input').value =
-        task.department || '';
+        isCommonIssue ? '' : (task.department || '');
 
       const commonIssueInput =
         document.getElementById('task-common-issue-input');
 
-      const relatedDepartmentsWrap =
-        document.getElementById('task-related-departments-wrap');
+      commonIssueInput.checked = isCommonIssue;
+      commonIssueInput.dispatchEvent(new Event('change'));
 
-      commonIssueInput.checked = !!task.commonIssue;
-
-      relatedDepartmentsWrap.classList.toggle(
-        'hidden',
-        !task.commonIssue
-      );
+      const savedRelatedDepartments = new Set([
+        ...(task.relatedDepartments || []),
+        ...(isCommonIssue && task.department ? [task.department] : [])
+      ]);
 
       document.querySelectorAll(
         'input[name="task-related-department"]'
       ).forEach(el => {
-        el.checked = (task.relatedDepartments || []).includes(el.value);
+        el.checked = savedRelatedDepartments.has(el.value);
       });
+
       document.getElementById('form-task-title').innerHTML = `<i class="fa-solid fa-pen text-brand-600"></i> Chỉnh Sửa Công Việc`;
       
     }
