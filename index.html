@@ -4098,6 +4098,11 @@ window.exportKPIReport = function() {
 
       container.innerHTML = filtered.map(t => {
         const assignee = window.members.find(m => m.id === t.assigneeId);
+const creator = window.members.find(m => m.id === t.createdBy);
+const creatorName = t.createdByName || creator?.name ||
+  (t.createdBy === window.loggedInUser?.uid
+    ? window.loggedInUser.name
+    : 'Không xác định');
         const overdue = isOverdue(t);
 
         let priorityBadge = '<span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">🟢 Thấp</span>';
@@ -4122,11 +4127,32 @@ window.exportKPIReport = function() {
             
 <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700/60 space-y-2 text-[10px]">
   <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 font-medium">
-    <div class="w-5 h-5 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[9px]">
+   
+<div class="flex items-center justify-between gap-2">
+  <div class="flex items-center gap-1.5 min-w-0 flex-1">
+    <div class="w-5 h-5 shrink-0 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[9px]">
       ${assignee ? assignee.name.charAt(0) : '?'}
     </div>
-    <span>${assignee ? assignee.name : 'Chưa giao'}</span>
+    <div class="min-w-0">
+      <div class="text-[9px] text-gray-400">Người thực hiện</div>
+      <div class="font-semibold text-gray-700 dark:text-gray-200 truncate">
+        ${assignee ? assignee.name : 'Chưa giao'}
+      </div>
+    </div>
   </div>
+
+  <div class="flex items-center gap-1.5 min-w-0 flex-1 justify-end text-right">
+    <div class="min-w-0">
+      <div class="text-[9px] text-gray-400">Người giao</div>
+      <div class="font-semibold text-gray-700 dark:text-gray-200 truncate">
+        ${creatorName}
+      </div>
+    </div>
+    <div class="w-5 h-5 shrink-0 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-[9px]">
+      ${creatorName !== 'Không xác định' ? creatorName.charAt(0) : '?'}
+    </div>
+  </div>
+</div>
 
   <div class="flex flex-wrap items-center gap-1.5">
     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 dark:bg-gray-700/50 ${overdue ? 'text-rose-600 font-bold' : 'text-gray-500 dark:text-gray-300'}">
