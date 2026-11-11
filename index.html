@@ -1762,17 +1762,10 @@ if (orgLevel !== 'LEADER') {
 
   </div>
 </div>
-<details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
 
-  <summary class="p-3 cursor-pointer flex items-center justify-between gap-2">
-    <span class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-      <i class="fa-solid fa-chart-pie text-indigo-500"></i>
-      Xem phân tích chi tiết
-    </span>
-    <i class="fa-solid fa-chevron-down text-gray-400 shrink-0"></i>
-  </summary>
+<div class="space-y-2">
+  <div class="p-2 space-y-2">
 
-  <div class="p-3 space-y-4">
 
      <!-- SECTION 1: XU HƯỚNG -->
     <div id="report-section-trend">
@@ -1909,7 +1902,7 @@ if (orgLevel !== 'LEADER') {
     </div>
   </div>
   </div>
-</details>
+</div>
 
 </section>
     <!-- TAB 5: SETTINGS & TEAM MANAGEMENT -->
@@ -3458,15 +3451,6 @@ window.showReportSection = function(section) {
     department: 'report-section-department',
     employee: 'report-section-employee'
   };
-
-  const target = document.getElementById(sections[section]);
-  const details = document.getElementById('report-section-trend')
-    ?.closest('details');
-
-  // Chọn Tổng quan thì đóng phần phân tích chi tiết
-  if (details) {
-    details.open = section !== 'overview';
-  }
 
   // Chỉ hiển thị nội dung được chọn
   Object.entries(sections).forEach(([key, id]) => {
