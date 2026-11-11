@@ -3284,15 +3284,16 @@ window.renderExecutiveOverview = function() {
   const topEl = document.getElementById('executive-top-performer');
   const issueEl = document.getElementById('executive-top-issue');
   const compareEl = document.getElementById('executive-period-comparison');
-  const insightEl = document.getElementById('executive-insight');
+    const insightEl = document.getElementById('executive-insight');
+  const employeeEl = document.getElementById('executive-employee-analysis');
 
-  if (!topEl || !issueEl || !compareEl || !insightEl) return;
-
+  if (!topEl || !issueEl || !compareEl || !insightEl || !employeeEl) return;
   if (!window.loggedInUser) {
     topEl.innerText = 'Chưa đăng nhập';
     issueEl.innerText = 'Chưa có dữ liệu';
     compareEl.innerText = 'Chưa có dữ liệu';
     insightEl.innerText = 'Vui lòng đăng nhập để xem tổng quan.';
+        employeeEl.innerText = 'Vui lòng đăng nhập để xem phân tích.';
     return;
   }
 
@@ -3509,7 +3510,134 @@ window.renderExecutiveOverview = function() {
   } else {
     compareEl.innerText = 'Toàn thời gian · Không áp dụng so sánh kỳ trước.';
   }
+  // V16.2 - Smart Employee Analysis
+  const employeeStats = members.map(member => {
+    const assignedAll = tasks.filter(
+      t => t.assigneeId === member.id
+    );
 
+    const assignedPeriod = currentTasks.filter(
+      t => t.assigneeId === member.id
+    );
+
+    const donePeriod = assignedPeriod.filter(
+      t => t.status === 'done'
+    );
+
+    const open = assignedAll.filter(
+      t => t.status !== 'done'
+    );
+
+    const overdue = open.filter(t =>
+      t.deadline &&
+      !isNaN(new Date(t.deadline).getTime()) &&
+      new Date(t.deadline) < now
+    );
+
+    const unack = open.filter(t => !t.acknowledged);
+
+    const rate = assignedPeriod.length
+      ? Math.round(donePeriod.length / assignedPeriod.length * 100)
+      : 0;
+
+    let action = 'Duy trì tiến độ';
+    let actionColor = 'text-emerald-600';
+
+    if (overdue.length > 0) {
+      action = 'Ưu tiên xử lý việc quá hạn';
+      actionColor = 'text-red-600';
+    } else if (unack.length > 0) {
+      action = 'Nhắc xác nhận nhiệm vụ';
+      actionColor = 'text-amber-600';
+    } else if (open.length > 0) {
+      action = 'Theo dõi tiến độ đang thực hiện';
+      actionColor = 'text-blue-600';
+    }
+
+    return {
+      name: member.name,
+      total: assignedAll.length,
+      open: open.length,
+      overdue: overdue.length,
+      unack: unack.length,
+      done: donePeriod.length,
+      rate,
+      action,
+      actionColor
+    };
+  }).filter(m => m.total > 0);
+
+  employeeStats.sort((a, b) =>
+    b.overdue - a.overdue ||
+    b.unack - a.unack ||
+    b.open - a.open
+  );
+
+  const needSupport = employeeStats.filter(
+    m => m.overdue > 0 || m.unack > 0
+  ).length;
+
+  const escapeName = value => String(value || '').replace(
+    /[&<>"']/g,
+    ch => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[ch]
+  );
+
+  employeeEl.innerHTML = employeeStats.length
+    ? `
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <div class="rounded-lg bg-gray-100 dark:bg-gray-800 p-2">
+          <p class="text-[10px] text-gray-500">Nhân viên có dữ liệu</p>
+          <p class="text-lg font-bold">${employeeStats.length}</p>
+        </div>
+        <div class="rounded-lg bg-amber-50 dark:bg-amber-950/30 p-2">
+          <p class="text-[10px] text-gray-500">Cần hỗ trợ</p>
+          <p class="text-lg font-bold text-amber-600">${needSupport}</p>
+        </div>
+      </div>
+
+      ${employeeStats.slice(0, 8).map((m, index) => `
+        <div class="rounded-lg border border-gray-100 dark:border-gray-700 p-3">
+          <div class="flex justify-between gap-2">
+            <strong class="text-xs">${index + 1}. ${escapeName(m.name)}</strong>
+            <span class="text-[10px] text-gray-500">
+              Hoàn thành: ${m.rate}%
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 mt-2 text-center">
+            <div>
+              <p class="text-[10px] text-gray-500">Đang mở</p>
+              <strong class="text-sm">${m.open}</strong>
+            </div>
+            <div>
+              <p class="text-[10px] text-gray-500">Trễ hạn</p>
+              <strong class="text-sm ${m.overdue > 0 ? 'text-red-600' : ''}">${m.overdue}</strong>
+            </div>
+            <div>
+              <p class="text-[10px] text-gray-500">Chưa xác nhận</p>
+              <strong class="text-sm ${m.unack > 0 ? 'text-amber-600' : ''}">${m.unack}</strong>
+            </div>
+          </div>
+
+          <p class="text-[10px] font-semibold mt-2 ${m.actionColor}">
+            ${m.action}
+          </p>
+        </div>
+      `).join('')}
+
+      ${employeeStats.length > 8
+        ? `<p class="text-[10px] text-gray-500 text-center">
+            Hiển thị 8/${employeeStats.length} nhân viên ưu tiên.
+          </p>`
+        : ''}
+    `
+    : '<p class="text-xs text-gray-400 text-center py-3">Chưa có dữ liệu nhân viên trong phạm vi quản lý.</p>';
   if (currentTasks.length === 0) {
     insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
   } else if (overdueTasks.length > 0) {
