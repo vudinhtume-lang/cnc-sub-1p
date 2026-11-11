@@ -4932,7 +4932,31 @@ let changedFields = [];
     if ((oldTask.desc || '') !== desc) {
       changedFields.push('Nội dung ghi chú đã thay đổi');
     }
+    if ((oldTask.department || '') !== department) {
+      changedFields.push(
+        `Bộ phận phụ trách: ${oldTask.department || 'Chưa phân loại'} → ${department}`
+      );
+    }
 
+    if (!!oldTask.commonIssue !== commonIssue) {
+      changedFields.push(
+        commonIssue
+          ? 'Đã chuyển thành Vấn đề chung'
+          : 'Đã bỏ trạng thái Vấn đề chung'
+      );
+    }
+
+    const oldRelatedDepartments = [
+      ...(oldTask.relatedDepartments || [])
+    ].sort().join(',');
+
+    const newRelatedDepartments = [
+      ...(commonIssue ? relatedDepartments : [])
+    ].sort().join(',');
+
+    if (oldRelatedDepartments !== newRelatedDepartments) {
+      changedFields.push('Danh sách bộ phận phối hợp đã thay đổi');
+    }
     targetTask = {
       ...oldTask,
       title,
