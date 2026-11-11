@@ -45,8 +45,7 @@
     import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
  
-import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, deleteDoc, updateDoc, query, where, addDoc, serverTimestamp, orderBy, limit, startAfter, getDocs, getDocsFromServer, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    const firebaseConfig = {
+import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, deleteDoc, updateDoc, query, where, or, addDoc, serverTimestamp, orderBy, limit, startAfter, getDocs, getDocsFromServer, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";    const firebaseConfig = {
       apiKey: "AIzaSyDmZZgcTzgyAUVi9NWnCbBZI5wimvUwwQY",
       authDomain: "cnc-sub-1p.firebaseapp.com",
       projectId: "cnc-sub-1p",
@@ -304,10 +303,13 @@ function startDataListeners(member) {
     'manager-created'
   );
 
-  window._usersUnsubscribe = onSnapshot(
+    window._usersUnsubscribe = onSnapshot(
     query(
       collection(db, 'users'),
-      where('managerUid', '==', member.uid)
+      or(
+        where('managerUid', '==', member.uid),
+        where('managerUids', 'array-contains', member.uid)
+      )
     ),
     (snapshot) => {
       const directReports = snapshot.docs.map(
