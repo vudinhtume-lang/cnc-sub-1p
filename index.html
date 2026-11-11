@@ -4821,44 +4821,11 @@ window.deleteTask = async function(taskId) {
 const creator = window.members.find(m => m.id === task.createdBy);
 
 document.getElementById('modal-task-title').innerText = task.title;
-  const creatorNameEl = document.getElementById('modal-task-creator');
-
-const knownCreatorName =
-  task.createdByName ||
-  creator?.name ||
+  document.getElementById('modal-task-creator').innerText =
+  task.createdByName || creator?.name ||
   (task.createdBy === window.loggedInUser?.uid
     ? window.loggedInUser.name
-    : '');
-
-creatorNameEl.innerText = knownCreatorName || 'Đang tìm người giao...';
-
-if (!knownCreatorName && task.createdBy) {
-  (async () => {
-    try {
-      const creatorHistoryQuery = query(
-        collection(db, 'task_history'),
-        where('taskId', '==', String(task.id))
-      );
-
-      const creatorHistorySnapshot = await getDocs(creatorHistoryQuery);
-
-      const createRecord = creatorHistorySnapshot.docs.find(doc =>
-        doc.data().action === 'CREATE' && doc.data().actorName
-      );
-
-      if (String(window.currentDetailTaskId) === String(taskId)) {
-        creatorNameEl.innerText =
-          createRecord?.data().actorName || 'Không xác định';
-      }
-    } catch (error) {
-      console.error('Lỗi tìm người giao nhiệm vụ:', error);
-
-      if (String(window.currentDetailTaskId) === String(taskId)) {
-        creatorNameEl.innerText = 'Không xác định';
-      }
-    }
-  })();
-}
+    : 'Không xác định');
       document.getElementById('modal-task-assignee').innerText = assignee?.name || task.assigneeName || 'Chưa rõ';
       document.getElementById('modal-task-deadline').innerText = formatDateTime(task.deadline);
       document.getElementById('modal-task-desc').innerText = task.desc || 'Không có mô tả chi tiết.';
