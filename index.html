@@ -5041,6 +5041,8 @@ window.switchTab('tasks');
 
     window.cancelEditTask = function() {
       document.getElementById('task-form').reset();
+            document.getElementById('task-related-departments-wrap')
+        .classList.add('hidden');
       document.getElementById('task-id-input').value = '';
       document.getElementById('form-task-title').innerHTML = `<i class="fa-solid fa-plus-circle text-brand-600"></i> Tạo Task Phân Công Mới`;
     }
