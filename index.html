@@ -1609,7 +1609,34 @@ if (orgLevel !== 'LEADER') {
       Theo dõi hiệu suất thực hiện nhiệm vụ và kết quả công việc.
     </p>
   </div>
+<!-- REPORT SECTION NAVIGATION -->
+<div class="sticky top-0 z-20 bg-gray-100 dark:bg-gray-900 py-2">
+  <div class="grid grid-cols-4 gap-1 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+    <button type="button" onclick="showReportSection('trend')"
+      class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold bg-indigo-600 text-white">
+      <i class="fa-solid fa-chart-line block mb-1"></i>
+      Xu hướng
+    </button>
 
+    <button type="button" onclick="showReportSection('bottleneck')"
+      class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold text-gray-500">
+      <i class="fa-solid fa-triangle-exclamation block mb-1"></i>
+      Điểm nghẽn
+    </button>
+
+    <button type="button" onclick="showReportSection('department')"
+      class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold text-gray-500">
+      <i class="fa-solid fa-layer-group block mb-1"></i>
+      Bộ phận
+    </button>
+
+    <button type="button" onclick="showReportSection('employee')"
+      class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold text-gray-500">
+      <i class="fa-solid fa-users block mb-1"></i>
+      Nhân viên
+    </button>
+  </div>
+</div>
   <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
     <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">
       Kỳ báo cáo
