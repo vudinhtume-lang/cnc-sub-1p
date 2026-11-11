@@ -93,11 +93,27 @@ function canAssignTaskTo(assigneeId) {
     );
 
   // Sửa task: Admin, Manager tạo task hoặc nhân viên cập nhật trạng thái
-  allow update: if isAdmin()
+    allow update: if isAdmin()
     || (
       canAssignTaskTo(request.resource.data.assigneeId)
       && resource.data.createdBy == request.auth.uid
       && request.resource.data.createdBy == resource.data.createdBy
+      && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly([
+          'title',
+          'assigneeId',
+          'assigneeName',
+          'priority',
+          'deadline',
+          'desc',
+          'updateVersion',
+          'updateChanges',
+          'updateAcknowledged',
+          'updateAcknowledgedAt',
+          'updateAcknowledgedBy',
+          'updateBy',
+          'updateAt'
+        ])
     )
     || (
       isActiveUser()
