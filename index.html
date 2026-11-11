@@ -3404,7 +3404,6 @@ window.renderExecutiveOverview = function() {
       : 0;
 
     const delta = completionRate - previousRate;
-    const direction = delta > 0 ? 'Tăng' : delta < 0 ? 'Giảm' : 'Không đổi';
 
     const isInPeriod = (value, from, to) => {
       if (!value) return false;
@@ -3442,19 +3441,14 @@ window.renderExecutiveOverview = function() {
     const currentLate = countMissedDeadlines(start, end);
     const previousLate = countMissedDeadlines(previousStart, previousEnd);
 
-    const formatTrend = (current, previous) => {
-      if (previous === 0) {
-        return current > 0 ? `Mới ${current}` : '0';
-      }
+       const formatTrend = (current, previous, isRate = false) => {
+      const delta = current - previous;
+      const arrow = delta > 0 ? '↑'
+        : delta < 0 ? '↓' : '→';
 
-      const change = Math.round(
-        (current - previous) / previous * 100
-      );
+      const unit = isRate ? '%' : '';
 
-      const arrow = change > 0 ? '↑'
-        : change < 0 ? '↓' : '→';
-
-      return `${arrow} ${Math.abs(change)}% (${current}/${previous})`;
+      return `${arrow} ${Math.abs(delta)}${unit} (${current}${unit}/${previous}${unit})`;
     };
 
             const trendColor = (current, previous, increaseIsGood) => {
@@ -3471,8 +3465,8 @@ window.renderExecutiveOverview = function() {
       <span class="grid grid-cols-2 gap-x-3 gap-y-2">
         <span class="block">
           <span class="block text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</span>
-                    <strong class="${delta > 0 ? 'text-blue-600 dark:text-blue-400' : delta < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">
-            ${direction} ${Math.abs(delta)} điểm %
+                             <strong class="${delta > 0 ? 'text-blue-600 dark:text-blue-400' : delta < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">
+            ${formatTrend(completionRate, previousRate, true)}
           </strong>
         </span>
         <span class="block">
