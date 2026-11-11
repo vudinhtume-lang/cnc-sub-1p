@@ -3457,11 +3457,34 @@ window.renderExecutiveOverview = function() {
       return `${arrow} ${Math.abs(change)}% (${current}/${previous})`;
     };
 
-    compareEl.innerText =
-      `${direction} ${Math.abs(delta)} điểm % tỷ lệ hoàn thành` +
-      ` · Tạo mới: ${formatTrend(currentCreated, previousCreated)}` +
-      ` · Hoàn thành: ${formatTrend(currentCompleted, previousCompleted)}` +
-      ` · Trễ hạn: ${formatTrend(currentLate, previousLate)}`;
+        compareEl.innerHTML = `
+      <div class="grid grid-cols-2 gap-x-3 gap-y-3">
+        <div>
+          <div class="text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</div>
+          <strong class="${rateColor}">
+            ${direction} ${Math.abs(delta)} điểm %
+          </strong>
+        </div>
+        <div>
+          <div class="text-gray-500 dark:text-gray-400">Tạo mới</div>
+          <strong class="text-gray-600 dark:text-gray-400">
+            ${formatTrend(currentCreated, previousCreated)}
+          </strong>
+        </div>
+        <div>
+          <div class="text-gray-500 dark:text-gray-400">Hoàn thành</div>
+          <strong class="${trendColor(currentCompleted, previousCompleted, true)}">
+            ${formatTrend(currentCompleted, previousCompleted)}
+          </strong>
+        </div>
+        <div>
+          <div class="text-gray-500 dark:text-gray-400">Trễ hạn</div>
+          <strong class="${trendColor(currentLate, previousLate, false)}">
+            ${formatTrend(currentLate, previousLate)}
+          </strong>
+        </div>
+      </div>
+    `;
 
   } else {
     compareEl.innerText = 'Toàn thời gian · Không áp dụng so sánh kỳ trước.';
