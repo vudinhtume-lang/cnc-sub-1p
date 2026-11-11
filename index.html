@@ -1982,9 +1982,13 @@ if (orgLevel !== 'LEADER') {
 
       <h3 id="modal-task-title" class="font-bold text-base text-gray-900 dark:text-white leading-snug"></h3>
       
-      <div class="space-y-2 text-xs bg-gray-50 dark:bg-gray-700/40 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-        <div class="flex justify-between">
-          <span class="text-gray-500">Người thực hiện:</span>
+     <div class="space-y-2 text-xs bg-gray-50 dark:bg-gray-700/40 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+  <div class="flex justify-between">
+    <span class="text-gray-500">Người giao nhiệm vụ:</span>
+    <span id="modal-task-creator" class="font-semibold text-gray-800 dark:text-gray-200"></span>
+  </div>
+  <div class="flex justify-between">
+    <span class="text-gray-500">Người thực hiện:</span>
           <span id="modal-task-assignee" class="font-semibold text-gray-800 dark:text-gray-200"></span>
         </div>
         <div class="flex justify-between">
@@ -4804,8 +4808,12 @@ window.deleteTask = async function(taskId) {
       if (!task) return;
 
       const assignee = window.members.find(m => m.id === task.assigneeId);
-      document.getElementById('modal-task-title').innerText = task.title;
-      document.getElementById('modal-task-assignee').innerText = assignee?.name || task.assigneeName || 'Chưa rõ';
+const creator = window.members.find(m => m.id === task.createdBy);
+
+document.getElementById('modal-task-title').innerText = task.title;
+document.getElementById('modal-task-creator').innerText =
+  task.createdByName || creator?.name || (task.createdBy === window.loggedInUser?.uid ? window.loggedInUser.name : 'Không xác định');
+document.getElementById('modal-task-assignee').innerText = assignee?.name || task.assigneeName || 'Chưa rõ';
       document.getElementById('modal-task-deadline').innerText = formatDateTime(task.deadline);
       document.getElementById('modal-task-desc').innerText = task.desc || 'Không có mô tả chi tiết.';
 
