@@ -158,14 +158,23 @@ match /task_history/{historyId} {
             ).data.assigneeId
           )
         )
-        && get(
-          /databases/$(database)/documents/users/$(
-            get(
-              /databases/$(database)/documents/tasks/$(taskId)
-            ).data.assigneeId
-          )
-        ).data.managerUid == request.auth.uid
-      )
+                && (
+          get(
+            /databases/$(database)/documents/users/$(
+              get(
+                /databases/$(database)/documents/tasks/$(taskId)
+              ).data.assigneeId
+            )
+          ).data.get('managerUid', '') == request.auth.uid
+          ||
+          request.auth.uid in get(
+            /databases/$(database)/documents/users/$(
+              get(
+                /databases/$(database)/documents/tasks/$(taskId)
+              ).data.assigneeId
+            )
+          ).data.get('managerUids', [])
+        )
     );
   }
 
