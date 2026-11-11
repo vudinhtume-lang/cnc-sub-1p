@@ -3394,6 +3394,7 @@ window.renderExecutiveOverview = function() {
     : 'Không có tồn đọng';
 
   if (previousStart) {
+    if (previousStart) {
     const previousDone = previousTasks.filter(
       t => t.status === 'done'
     ).length;
@@ -3405,12 +3406,63 @@ window.renderExecutiveOverview = function() {
     const delta = completionRate - previousRate;
     const direction = delta > 0 ? 'Tăng' : delta < 0 ? 'Giảm' : 'Không đổi';
 
-    compareEl.innerText = previousTasks.length
-      ? `${direction} ${Math.abs(delta)} điểm % · Kỳ này ${completionRate}% / Kỳ trước ${previousRate}%`
-      : 'Kỳ trước chưa có dữ liệu để so sánh.';
+    const isInPeriod = (value, from, to) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return !isNaN(date.getTime()) &&
+        date >= from && date < to;
+    };
+
+    const currentCreated = currentTasks.length;
+    const previousCreated = previousTasks.length;
+
+    const currentCompleted = tasks.filter(t =>
+      isInPeriod(t.completedAt, start, end)
+    ).length;
+
+    const previousCompleted = tasks.filter(t =>
+      isInPeriod(t.completedAt, previousStart, previousEnd)
+    ).length;
+
+    const countMissedDeadlines = (from, to) =>
+      tasks.filter(t => {
+        if (!isInPeriod(t.deadline, from, to)) return false;
+
+        const deadline = new Date(t.deadline);
+
+        if (t.status !== 'done') return true;
+        if (!t.completedAt) return false;
+
+        return new Date(t.completedAt) > deadline;
+      }).length;
+
+    const currentLate = countMissedDeadlines(start, end);
+    const previousLate = countMissedDeadlines(previousStart, previousEnd);
+
+    const formatTrend = (current, previous) => {
+      if (previous === 0) {
+        return current > 0 ? `Mới ${current}` : '0';
+      }
+
+      const change = Math.round(
+        (current - previous) / previous * 100
+      );
+
+      const arrow = change > 0 ? '↑'
+        : change < 0 ? '↓' : '→';
+
+      return `${arrow} ${Math.abs(change)}% (${current}/${previous})`;
+    };
+
+    compareEl.innerText =
+      `${direction} ${Math.abs(delta)} điểm % tỷ lệ hoàn thành` +
+      ` · Tạo mới: ${formatTrend(currentCreated, previousCreated)}` +
+      ` · Hoàn thành: ${formatTrend(currentCompleted, previousCompleted)}` +
+      ` · Trễ hạn: ${formatTrend(currentLate, previousLate)}`;
+
   } else {
     compareEl.innerText = 'Toàn thời gian · Không áp dụng so sánh kỳ trước.';
-  }
+    }
 
   if (currentTasks.length === 0) {
     insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
