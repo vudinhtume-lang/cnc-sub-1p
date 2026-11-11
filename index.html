@@ -4938,9 +4938,12 @@ let changedFields = [];
       title,
       assigneeId,
       assigneeName: newAssignee,
-      priority,
+            priority,
       deadline,
-      desc
+      desc,
+      department,
+      commonIssue,
+      relatedDepartments: commonIssue ? relatedDepartments : []
     };
 
     if (changedFields.length > 0) {
