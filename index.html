@@ -5342,6 +5342,14 @@ if (!window.canManageTask(task)) {
     }
 
     window.onload = function() {
+            const commonIssueInput = document.getElementById('task-common-issue-input');
+      const relatedDepartmentsWrap = document.getElementById('task-related-departments-wrap');
+
+      if (commonIssueInput && relatedDepartmentsWrap) {
+        commonIssueInput.addEventListener('change', function() {
+          relatedDepartmentsWrap.classList.toggle('hidden', !this.checked);
+        });
+      }
       window.renderAll();
       window.checkUnacknowledgedTasks();
       updateNotificationPermissionLabel();
