@@ -3467,17 +3467,11 @@ window.renderExecutiveOverview = function() {
         : 'text-red-600 dark:text-red-400';
     };
 
-    const rateColor = delta > 0
-      ? 'text-blue-600 dark:text-blue-400'
-      : delta < 0
-        ? 'text-red-600 dark:text-red-400'
-        : 'text-gray-600 dark:text-gray-400';
-
     compareEl.innerHTML = `
       <span class="grid grid-cols-2 gap-x-3 gap-y-2">
         <span class="block">
           <span class="block text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</span>
-          <strong class="${rateColor}">
+                    <strong class="${delta > 0 ? 'text-blue-600 dark:text-blue-400' : delta < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}">
             ${direction} ${Math.abs(delta)} điểm %
           </strong>
         </span>
