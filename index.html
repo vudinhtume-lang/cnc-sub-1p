@@ -3429,8 +3429,9 @@ const memberStats = subMembers.map(m => {
 };
 
 // V13.4 - Executive Management Overview
-    // V16.5 - Report Section Navigation
-function showReportSection(section) {
+    
+// V16.5.1 - Report Section Navigation
+window.showReportSection = function(section) {
   const sections = {
     trend: 'report-section-trend',
     bottleneck: 'report-section-bottleneck',
@@ -3438,11 +3439,21 @@ function showReportSection(section) {
     employee: 'report-section-employee'
   };
 
+  // Tự động mở khung phân tích chi tiết
+  const target = document.getElementById(sections[section]);
+  const details = target?.closest('details');
+
+  if (details) details.open = true;
+
+  // Chỉ hiển thị khu vực được chọn
   Object.entries(sections).forEach(([key, id]) => {
     const el = document.getElementById(id);
-    if (el) el.classList.toggle('hidden', key !== section);
+    if (el) {
+      el.style.display = key === section ? '' : 'none';
+    }
   });
 
+  // Cập nhật trạng thái nút
   document.querySelectorAll('.report-nav-btn').forEach((btn, index) => {
     const isActive = Object.keys(sections)[index] === section;
 
@@ -3450,10 +3461,10 @@ function showReportSection(section) {
     btn.classList.toggle('text-white', isActive);
     btn.classList.toggle('text-gray-500', !isActive);
   });
-}
+};
 
 // Mặc định hiển thị Xu hướng
-showReportSection('trend');
+window.showReportSection('trend');
 window.renderExecutiveOverview = function() {
   const topEl = document.getElementById('executive-top-performer');
   const issueEl = document.getElementById('executive-top-issue');
