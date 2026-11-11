@@ -3909,7 +3909,157 @@ window.renderExecutiveOverview = function() {
 
     departmentOverviewEl.innerHTML = departmentCards.join('');
   }
+  // V16.4 - Report Department Analysis
+  const reportDepartmentEl = document.getElementById(
+    'report-department-analysis-content'
+  );
 
+  if (reportDepartmentEl) {
+    const reportDepartments = [
+      { id: 'DEBURRING', name: 'Deburring' },
+      { id: 'BLASTING', name: 'Blasting' },
+      { id: 'LASER', name: 'Laser' },
+      { id: 'DIPPING_14', name: 'Dipping 14 Bath' },
+      { id: 'DIPPING_8', name: 'Dipping 8 Bath' }
+    ];
+
+    const getReportDeptStats = list => {
+      const total = list.length;
+      const done = list.filter(t => t.status === 'done').length;
+      const open = total - done;
+      const overdue = list.filter(t =>
+        t.status !== 'done' &&
+        t.deadline &&
+        !isNaN(new Date(t.deadline).getTime()) &&
+        new Date(t.deadline) < now
+      ).length;
+
+      return {
+        total,
+        done,
+        open,
+        overdue,
+        rate: total ? Math.round(done / total * 100) : 0
+      };
+    };
+
+    const reportDeptData = reportDepartments.map(dept => ({
+      name: dept.name,
+      stats: getReportDeptStats(
+        currentTasks.filter(t =>
+          t.department === dept.id &&
+          t.commonIssue !== true
+        )
+      )
+    }));
+
+    const reportCommonTasks = currentTasks.filter(
+      t => t.commonIssue === true
+    );
+
+    const commonDeptSet = new Set();
+
+    reportCommonTasks.forEach(t => {
+      if (t.department) commonDeptSet.add(t.department);
+
+      if (Array.isArray(t.relatedDepartments)) {
+        t.relatedDepartments.forEach(id => {
+          if (id) commonDeptSet.add(id);
+        });
+      }
+    });
+
+    reportDeptData.push({
+      name: 'Vấn đề chung',
+      stats: getReportDeptStats(reportCommonTasks),
+      commonCount: commonDeptSet.size
+    });
+
+    const priorityDept = reportDeptData
+      .filter(d => d.stats.total > 0)
+      .sort((a, b) =>
+        b.stats.overdue - a.stats.overdue ||
+        b.stats.open - a.stats.open
+      )[0];
+
+    reportDepartmentEl.innerHTML = `
+      <div class="rounded-lg bg-indigo-50 dark:bg-indigo-950/30 p-3">
+        <p class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">
+          <i class="fa-solid fa-bullseye mr-1"></i>
+          BỘ PHẬN CẦN ƯU TIÊN
+        </p>
+        <p class="text-sm font-bold mt-1">
+          ${
+            priorityDept
+              ? priorityDept.name
+              : 'Chưa có dữ liệu'
+          }
+        </p>
+        <p class="text-[10px] text-gray-500 mt-1">
+          ${
+            priorityDept
+              ? `Quá hạn ${priorityDept.stats.overdue} · Chưa hoàn thành ${priorityDept.stats.open}`
+              : 'Chưa phát sinh nhiệm vụ trong kỳ'
+          }
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        ${reportDeptData.map(item => {
+          const s = item.stats;
+
+          return `
+            <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+              <div class="flex justify-between items-start gap-1">
+                <strong class="text-xs">${item.name}</strong>
+                <span class="text-xs font-bold ${
+                  s.rate === 100
+                    ? 'text-emerald-600'
+                    : s.overdue > 0
+                      ? 'text-red-600'
+                      : 'text-indigo-600'
+                }">${s.rate}%</span>
+              </div>
+
+              <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full"
+                  style="width:${s.rate}%"></div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-y-2 mt-3">
+                <div>
+                  <p class="text-[10px] text-gray-500">Tổng nhiệm vụ</p>
+                  <strong class="text-base">${s.total}</strong>
+                </div>
+                <div>
+                  <p class="text-[10px] text-gray-500">Hoàn thành</p>
+                  <strong class="text-base text-emerald-600">${s.done}</strong>
+                </div>
+                <div>
+                  <p class="text-[10px] text-gray-500">Chưa hoàn thành</p>
+                  <strong class="text-base">${s.open}</strong>
+                </div>
+                <div>
+                  <p class="text-[10px] text-gray-500">Quá hạn</p>
+                  <strong class="text-base ${
+                    s.overdue > 0 ? 'text-red-600' : ''
+                  }">${s.overdue}</strong>
+                </div>
+              </div>
+
+              ${
+                item.commonCount !== undefined
+                  ? `<p class="text-[10px] text-indigo-600 mt-2">
+                      ${item.commonCount} bộ phận tham gia
+                    </p>`
+                  : ''
+              }
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
   if (currentTasks.length === 0) {
     insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
   } else if (overdueTasks.length > 0) {
