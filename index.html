@@ -3717,6 +3717,118 @@ window.renderExecutiveOverview = function() {
         : ''}
     `
     : '<p class="text-xs text-gray-400 text-center py-3">Chưa có dữ liệu nhân viên trong phạm vi quản lý.</p>';
+  
+  // V16.3 - Department Overview
+  const departmentOverviewEl = document.getElementById(
+    'executive-department-overview'
+  );
+
+  if (departmentOverviewEl) {
+    const departmentList = [
+      { id: 'DEBURRING', name: 'Deburring' },
+      { id: 'BLASTING', name: 'Blasting' },
+      { id: 'LASER', name: 'Laser' },
+      { id: 'DIPPING_14', name: 'Dipping 14 Bath' },
+      { id: 'DIPPING_8', name: 'Dipping 8 Bath' }
+    ];
+
+    const getDepartmentStats = (list) => {
+      const total = list.length;
+      const done = list.filter(t => t.status === 'done').length;
+      const open = total - done;
+      const overdue = list.filter(t =>
+        t.status !== 'done' &&
+        t.deadline &&
+        !isNaN(new Date(t.deadline).getTime()) &&
+        new Date(t.deadline) < now
+      ).length;
+
+      return {
+        total,
+        done,
+        open,
+        overdue,
+        rate: total ? Math.round(done / total * 100) : 0
+      };
+    };
+
+    const renderDepartmentCard = (name, stats, extra = '') => `
+      <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+        <div class="flex justify-between items-center gap-1">
+          <strong class="text-xs">${name}</strong>
+          <span class="text-xs font-bold ${
+            stats.rate === 100
+              ? 'text-emerald-600'
+              : stats.overdue > 0
+                ? 'text-red-600'
+                : 'text-indigo-600'
+          }">${stats.rate}%</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-x-2 gap-y-2 mt-3">
+          <div>
+            <p class="text-[10px] text-gray-500">Tổng nhiệm vụ</p>
+            <strong class="text-base">${stats.total}</strong>
+          </div>
+          <div>
+            <p class="text-[10px] text-gray-500">Đã hoàn thành</p>
+            <strong class="text-base text-emerald-600">${stats.done}</strong>
+          </div>
+          <div>
+            <p class="text-[10px] text-gray-500">Chưa hoàn thành</p>
+            <strong class="text-base">${stats.open}</strong>
+          </div>
+          <div>
+            <p class="text-[10px] text-gray-500">Quá hạn</p>
+            <strong class="text-base ${
+              stats.overdue > 0 ? 'text-red-600' : 'text-gray-500'
+            }">${stats.overdue}</strong>
+          </div>
+        </div>
+        ${extra}
+      </div>
+    `;
+
+    const departmentCards = departmentList.map(dept => {
+      const deptTasks = tasks.filter(t => t.department === dept.id);
+      return renderDepartmentCard(
+        dept.name,
+        getDepartmentStats(deptTasks)
+      );
+    });
+
+    const commonTasks = tasks.filter(t => t.commonIssue === true);
+
+    const commonDepartments = new Set();
+
+    commonTasks.forEach(t => {
+      if (t.department) commonDepartments.add(t.department);
+
+      if (Array.isArray(t.relatedDepartments)) {
+        t.relatedDepartments.forEach(dept => {
+          if (dept) commonDepartments.add(dept);
+        });
+      }
+    });
+
+    const commonExtra = `
+      <p class="text-[10px] text-indigo-600 dark:text-indigo-400 mt-2">
+        <i class="fa-solid fa-people-group mr-1"></i>
+        ${commonDepartments.size} bộ phận tham gia
+      </p>
+    `;
+
+    departmentCards.unshift(
+      renderDepartmentCard(
+        'Vấn đề chung',
+        getDepartmentStats(commonTasks),
+        commonExtra
+      )
+    );
+
+    departmentOverviewEl.innerHTML = departmentCards.join('');
+  }
+
   if (currentTasks.length === 0) {
     insightEl.innerText = 'Chưa có nhiệm vụ trong kỳ báo cáo.';
   } else if (overdueTasks.length > 0) {
