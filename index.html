@@ -1609,11 +1609,19 @@ if (orgLevel !== 'LEADER') {
       Theo dõi hiệu suất thực hiện nhiệm vụ và kết quả công việc.
     </p>
   </div>
+
 <!-- REPORT SECTION NAVIGATION -->
 <div class="sticky top-0 z-20 bg-gray-100 dark:bg-gray-900 py-2">
-  <div class="grid grid-cols-4 gap-1 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
-    <button type="button" onclick="showReportSection('trend')"
+  <div class="grid grid-cols-5 gap-1 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
+
+    <button type="button" onclick="showReportSection('overview')"
       class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold bg-indigo-600 text-white">
+      <i class="fa-solid fa-gauge-high block mb-1"></i>
+      Tổng quan
+    </button>
+
+    <button type="button" onclick="showReportSection('trend')"
+      class="report-nav-btn px-1 py-2 rounded-lg text-[10px] font-bold text-gray-500">
       <i class="fa-solid fa-chart-line block mb-1"></i>
       Xu hướng
     </button>
@@ -1635,8 +1643,10 @@ if (orgLevel !== 'LEADER') {
       <i class="fa-solid fa-users block mb-1"></i>
       Nhân viên
     </button>
+
   </div>
 </div>
+
   <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
     <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">
       Kỳ báo cáo
@@ -1655,7 +1665,8 @@ if (orgLevel !== 'LEADER') {
       Xuất báo cáo KPI Excel
         </button>
   </div>
-
+<!-- SECTION 0: TỔNG QUAN -->
+<div id="report-section-overview" class="space-y-3">
   <div class="grid grid-cols-2 gap-3">
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
@@ -1743,7 +1754,7 @@ if (orgLevel !== 'LEADER') {
     </div>
 
   </div>
-
+</div>
 <details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
 
   <summary class="p-3 cursor-pointer flex items-center justify-between gap-2">
@@ -3430,22 +3441,27 @@ const memberStats = subMembers.map(m => {
 
 // V13.4 - Executive Management Overview
     
-// V16.5.1 - Report Section Navigation
+
+// V16.6 - Five Report Sections Navigation
 window.showReportSection = function(section) {
   const sections = {
+    overview: 'report-section-overview',
     trend: 'report-section-trend',
     bottleneck: 'report-section-bottleneck',
     department: 'report-section-department',
     employee: 'report-section-employee'
   };
 
-  // Tự động mở khung phân tích chi tiết
   const target = document.getElementById(sections[section]);
-  const details = target?.closest('details');
+  const details = document.getElementById('report-section-trend')
+    ?.closest('details');
 
-  if (details) details.open = true;
+  // Chọn Tổng quan thì đóng phần phân tích chi tiết
+  if (details) {
+    details.open = section !== 'overview';
+  }
 
-  // Chỉ hiển thị khu vực được chọn
+  // Chỉ hiển thị nội dung được chọn
   Object.entries(sections).forEach(([key, id]) => {
     const el = document.getElementById(id);
     if (el) {
@@ -3453,7 +3469,7 @@ window.showReportSection = function(section) {
     }
   });
 
-  // Cập nhật trạng thái nút
+  // Cập nhật trạng thái Selection
   document.querySelectorAll('.report-nav-btn').forEach((btn, index) => {
     const isActive = Object.keys(sections)[index] === section;
 
@@ -3463,8 +3479,8 @@ window.showReportSection = function(section) {
   });
 };
 
-// Mặc định hiển thị Xu hướng
-window.showReportSection('trend');
+// Mặc định mở Tổng quan
+window.showReportSection('overview');
 window.renderExecutiveOverview = function() {
   const topEl = document.getElementById('executive-top-performer');
   const issueEl = document.getElementById('executive-top-issue');
