@@ -4995,23 +4995,27 @@ window.renderTaskUpdateNotifications = function() {
       const deadline = document.getElementById('task-deadline-input').value;
       const desc = document.getElementById('task-desc-input').value;
 
-      const department = document.getElementById('task-department-input').value;
+      
       const commonIssue = document.getElementById('task-common-issue-input').checked;
+
+      const department = commonIssue
+        ? ''
+        : document.getElementById('task-department-input').value;
+
       const relatedDepartments = [
         ...document.querySelectorAll('input[name="task-related-department"]:checked')
-      ]
-        .map(el => el.value)
-        .filter(value => value !== department);
+      ].map(el => el.value);
 
-      if (!department) {
+      if (!commonIssue && !department) {
         window.showToast('Vui lòng chọn bộ phận phụ trách.', 'warning');
         return;
       }
 
       if (commonIssue && relatedDepartments.length === 0) {
-        window.showToast('Vui lòng chọn ít nhất một bộ phận phối hợp khác bộ phận phụ trách.', 'warning');
+        window.showToast('Vui lòng chọn ít nhất một bộ phận tham gia xử lý.', 'warning');
         return;
       }
+
 
       let targetTask = null;
 let changedFields = [];
