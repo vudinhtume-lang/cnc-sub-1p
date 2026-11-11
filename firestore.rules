@@ -175,7 +175,7 @@ match /task_history/{historyId} {
             )
           ).data.get('managerUids', [])
         )
-    );
+        ));
   }
 
   allow read: if isAdmin()
