@@ -1392,17 +1392,29 @@ if (orgLevel !== 'LEADER') {
           <button onclick="setTaskFilter('status', 'overdue')" id="filter-status-overdue" class="filter-btn px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-gray-800 text-rose-600 dark:text-rose-400 border border-gray-200 dark:border-gray-700 shrink-0">Trễ hạn</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <select id="filter-assignee-select" onchange="renderTasks()" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
-            <option value="all">Tất cả người phụ trách</option>
-          </select>
-          <select id="filter-priority-select" onchange="renderTasks()" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
-            <option value="all">Mọi độ ưu tiên</option>
-            <option value="high">Ưu tiên: Cao</option>
-            <option value="medium">Ưu tiên: Trung bình</option>
-            <option value="low">Ưu tiên: Thấp</option>
-          </select>
-        </div>
+     
+<div class="grid grid-cols-2 gap-2">
+  <select id="filter-department-select" onchange="renderTasks()" class="col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
+    <option value="all">Tất cả bộ phận</option>
+    <option value="common">Vấn đề chung</option>
+    <option value="DEBURRING">Deburring</option>
+    <option value="BLASTING">Blasting</option>
+    <option value="LASER">Laser</option>
+    <option value="DIPPING_14">Dipping 14 Bath</option>
+    <option value="DIPPING_8">Dipping 8 Bath</option>
+  </select>
+
+  <select id="filter-assignee-select" onchange="renderTasks()" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
+    <option value="all">Tất cả người phụ trách</option>
+  </select>
+
+  <select id="filter-priority-select" onchange="renderTasks()" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none">
+    <option value="all">Mọi độ ưu tiên</option>
+    <option value="high">Ưu tiên: Cao</option>
+    <option value="medium">Ưu tiên: Trung bình</option>
+    <option value="low">Ưu tiên: Thấp</option>
+  </select>
+</div>
       </div>
 
             <div class="flex items-center justify-between gap-2">
@@ -4213,7 +4225,7 @@ window.exportKPIReport = function() {
   const searchVal = (document.getElementById('task-search-input')?.value || '').toLowerCase();
   const assigneeVal = document.getElementById('filter-assignee-select')?.value || 'all';
   const priorityVal = document.getElementById('filter-priority-select')?.value || 'all';
-
+  const departmentVal = document.getElementById('filter-department-select')?.value || 'all';
   if (window.quickRoleMode === 'my_tasks' && window.loggedInUser) {
     filtered = filtered.filter(t => t.assigneeId === window.loggedInUser.id);
   }
@@ -4309,6 +4321,19 @@ window.exportKPIReport = function() {
   filtered = filtered.filter(t => t.status === window.filterStatus);
    }
 
+  if (departmentVal === 'common') {
+    filtered = filtered.filter(t => t.commonIssue === true);
+  } else if (departmentVal !== 'all') {
+    filtered = filtered.filter(t => {
+      if (t.commonIssue === true) {
+        return t.department === departmentVal ||
+          (t.relatedDepartments || []).includes(departmentVal);
+      }
+
+      return t.department === departmentVal;
+    });
+  }
+
   if (assigneeVal !== 'all') {
     filtered = filtered.filter(t => t.assigneeId === assigneeVal);
   }
@@ -4398,7 +4423,7 @@ window.exportKPIReport = function() {
       const searchVal = (document.getElementById('task-search-input')?.value || '').toLowerCase();
       const assigneeVal = document.getElementById('filter-assignee-select')?.value || 'all';
       const priorityVal = document.getElementById('filter-priority-select')?.value || 'all';
-
+const departmentVal = document.getElementById('filter-department-select')?.value || 'all';
       let filtered = window.tasks;
 
       if (window.quickRoleMode === 'my_tasks' && window.loggedInUser) {
@@ -4495,7 +4520,18 @@ window.exportKPIReport = function() {
 } else if (window.filterStatus !== 'all') {
   filtered = filtered.filter(t => t.status === window.filterStatus);
         }
+      if (departmentVal === 'common') {
+        filtered = filtered.filter(t => t.commonIssue === true);
+      } else if (departmentVal !== 'all') {
+        filtered = filtered.filter(t => {
+          if (t.commonIssue === true) {
+            return t.department === departmentVal ||
+              (t.relatedDepartments || []).includes(departmentVal);
+          }
 
+          return t.department === departmentVal;
+        });
+            }
       if (assigneeVal !== 'all') {
         filtered = filtered.filter(t => t.assigneeId === assigneeVal);
       }
