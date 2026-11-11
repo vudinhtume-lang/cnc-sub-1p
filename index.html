@@ -468,6 +468,7 @@ window.cncSyncManagerScopes = async () => {
       users.map(user => [user.uid, user])
     );
 
+    
     // Kiểm tra liên kết quản lý có tồn tại
     const errors = [];
 
@@ -494,9 +495,53 @@ window.cncSyncManagerScopes = async () => {
       });
     });
 
+    // Kiểm tra vòng lặp trong toàn bộ sơ đồ quyền
+    const graphState = new Map();
+    const cycleErrors = new Set();
+
+    function checkScopeCycle(user) {
+      const state = graphState.get(user.uid);
+
+      if (state === 1) {
+        cycleErrors.add(
+          `Phát hiện vòng lặp quyền tại ${user.name || user.uid}`
+        );
+        return;
+      }
+
+      if (state === 2) return;
+
+      graphState.set(user.uid, 1);
+
+      const links = [
+        ...(user.additionalManagerUids || [])
+      ];
+
+      const parentUid =
+        user.parentUid || user.managerUid || '';
+
+      if (parentUid && parentUid !== ADMIN_UID) {
+        links.push(parentUid);
+      }
+
+      links.forEach(uid => {
+        const linkedUser = usersByUid.get(uid);
+
+        if (linkedUser) {
+          checkScopeCycle(linkedUser);
+        }
+      });
+
+      graphState.set(user.uid, 2);
+    }
+
+    users.forEach(user => checkScopeCycle(user));
+
+    cycleErrors.forEach(error => errors.push(error));
+
     if (errors.length) {
       throw new Error(
-        'Có liên kết quản lý không hợp lệ:\n' +
+        'Cấu trúc quản lý không hợp lệ:\n' +
         errors.slice(0, 10).join('\n')
       );
     }
