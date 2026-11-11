@@ -3429,6 +3429,31 @@ const memberStats = subMembers.map(m => {
 };
 
 // V13.4 - Executive Management Overview
+    // V16.5 - Report Section Navigation
+function showReportSection(section) {
+  const sections = {
+    trend: 'report-section-trend',
+    bottleneck: 'report-section-bottleneck',
+    department: 'report-section-department',
+    employee: 'report-section-employee'
+  };
+
+  Object.entries(sections).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', key !== section);
+  });
+
+  document.querySelectorAll('.report-nav-btn').forEach((btn, index) => {
+    const isActive = Object.keys(sections)[index] === section;
+
+    btn.classList.toggle('bg-indigo-600', isActive);
+    btn.classList.toggle('text-white', isActive);
+    btn.classList.toggle('text-gray-500', !isActive);
+  });
+}
+
+// Mặc định hiển thị Xu hướng
+showReportSection('trend');
 window.renderExecutiveOverview = function() {
   const topEl = document.getElementById('executive-top-performer');
   const issueEl = document.getElementById('executive-top-issue');
