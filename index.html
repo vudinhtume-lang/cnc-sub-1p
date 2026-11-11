@@ -118,7 +118,10 @@ import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, deleteDoc, u
       : [],
 
     canAssignTasks: data.canAssignTasks === true
-      || data.role === 'MANAGER',
+  || (
+    data.canAssignTasks !== false &&
+    data.role === 'MANAGER'
+  ),
 
     isManager: uid === ADMIN_UID
   };
