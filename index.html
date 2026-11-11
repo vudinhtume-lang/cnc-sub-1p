@@ -3789,6 +3789,7 @@ window.renderExecutiveOverview = function() {
       </div>
     `;
 
+    
     const departmentCards = departmentList.map(dept => {
       const deptTasks = tasks.filter(t => t.department === dept.id);
       return renderDepartmentCard(
