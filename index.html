@@ -4807,6 +4807,15 @@ window.deleteTask = async function(taskId) {
       window.currentDetailTaskId = taskId;
       const task = window.tasks.find(t => t.id === taskId);
       if (!task) return;
+        const historyContainer = document.getElementById('task-history-container');
+  if (historyContainer) {
+    historyContainer.classList.add('hidden');
+    historyContainer.innerHTML = `
+      <div class="text-xs text-gray-500">
+        Nhấn để xem lịch sử hoạt động.
+      </div>
+    `;
+  }
 
       const assignee = window.members.find(m => m.id === task.assigneeId);
 const creator = window.members.find(m => m.id === task.createdBy);
