@@ -4976,8 +4976,11 @@ let changedFields = [];
           deadline,
           status: 'todo',
           acknowledged: false,
-          acknowledgedAt: null,
+                    acknowledgedAt: null,
           desc,
+          department,
+          commonIssue,
+          relatedDepartments: commonIssue ? relatedDepartments : [],
           createdAt: new Date().toISOString()
         };
         window.tasks.unshift(targetTask);
