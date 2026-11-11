@@ -3424,8 +3424,6 @@ window.renderExecutiveOverview = function() {
       isInPeriod(t.completedAt, previousStart, previousEnd)
     ).length;
 
-    const now = new Date();
-
     const countMissedDeadlines = (from, to) =>
       tasks.filter(t => {
         if (!isInPeriod(t.deadline, from, to)) return false;
