@@ -1451,6 +1451,57 @@ if (orgLevel !== 'LEADER') {
           </div>
 
           <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+              Bộ phận phụ trách <span class="text-rose-500">*</span>
+            </label>
+            <select id="task-department-input" required
+              class="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-xs dark:text-white">
+              <option value="">-- Chọn bộ phận --</option>
+              <option value="DEBURRING">Deburring</option>
+              <option value="BLASTING">Blasting</option>
+              <option value="LASER">Laser</option>
+              <option value="DIPPING_14">Dipping 14 Bath</option>
+              <option value="DIPPING_8">Dipping 8 Bath</option>
+            </select>
+          </div>
+
+          <div class="rounded-xl border border-gray-200 dark:border-gray-600 p-3 space-y-2">
+            <label class="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
+              <input type="checkbox" id="task-common-issue-input"
+                class="w-4 h-4 rounded">
+              Đây là Vấn đề chung liên bộ phận
+            </label>
+
+            <div id="task-related-departments-wrap" class="hidden space-y-2">
+              <p class="text-[11px] text-gray-500">
+                Chọn các bộ phận cùng tham gia xử lý:
+              </p>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" name="task-related-department" value="DEBURRING">
+                  Deburring
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" name="task-related-department" value="BLASTING">
+                  Blasting
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" name="task-related-department" value="LASER">
+                  Laser
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" name="task-related-department" value="DIPPING_14">
+                  Dipping 14 Bath
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" name="task-related-department" value="DIPPING_8">
+                  Dipping 8 Bath
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Hạn chót (Deadline) <span class="text-rose-500">*</span></label>
             <input type="datetime-local" id="task-deadline-input" required class="w-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white">
           </div>
