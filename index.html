@@ -4606,10 +4606,11 @@ let changedFields = [];
   }
       } else {
         targetTask = {
-          id: 'task-' + Date.now(),
-          createdBy: window.loggedInUser.uid,
-          title,
-          assigneeId,
+  id: 'task-' + Date.now(),
+  createdBy: window.loggedInUser.uid,
+  createdByName: window.loggedInUser.name || '',
+  title,
+  assigneeId,
           assigneeName: window.members.find(m => m.id === assigneeId)?.name || '',
           priority,
           deadline,
