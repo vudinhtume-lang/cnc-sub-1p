@@ -1571,10 +1571,14 @@ if (orgLevel !== 'LEADER') {
 
   </div>
 
+  
   <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-    <div class="flex justify-between text-xs font-semibold mb-2">
-      <span>Tỷ lệ hoàn thành</span>
-      <span id="kpi-completion-rate">0%</span>
+    <div class="flex items-center justify-between mb-3">
+      <span class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200">
+        <i class="fa-solid fa-chart-line text-indigo-500"></i>
+        Tỷ lệ hoàn thành
+      </span>
+      <span id="kpi-completion-rate" class="text-sm font-bold">0%</span>
     </div>
     <div class="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
       <div id="kpi-completion-bar"
@@ -1583,10 +1587,12 @@ if (orgLevel !== 'LEADER') {
     </div>
   </div>
 
-  
   <!-- SO SÁNH VỚI KỲ TRƯỚC -->
   <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
-    <p class="text-[10px] text-gray-500 mb-2">So sánh với kỳ trước</p>
+    <div class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+      <i class="fa-solid fa-arrows-left-right text-indigo-500"></i>
+      So sánh với kỳ trước
+    </div>
     <p id="executive-period-comparison" class="text-xs font-semibold">
       Đang chờ dữ liệu...
     </p>
@@ -1594,7 +1600,10 @@ if (orgLevel !== 'LEADER') {
 
   <!-- NHẬN ĐỊNH QUẢN TRỊ -->
   <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
-    <p class="text-[10px] text-gray-500 mb-1">Nhận định quản trị</p>
+    <div class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+      <i class="fa-solid fa-lightbulb text-indigo-500"></i>
+      Nhận định quản trị
+    </div>
     <p id="executive-insight" class="text-xs leading-relaxed">
       Đang chờ dữ liệu...
     </p>
@@ -1602,14 +1611,14 @@ if (orgLevel !== 'LEADER') {
 
   <!-- TỔNG QUAN QUẢN TRỊ -->
   <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
-    <div class="flex items-center justify-between mb-3">
-      <div>
-        <h3 class="font-bold text-sm">Tổng quan quản trị</h3>
-        <p class="text-[10px] text-gray-500 mt-1">
-          Những điểm quan trọng cần nắm bắt
-        </p>
-      </div>
-      <i class="fa-solid fa-gauge-high text-indigo-500 text-xl"></i>
+    <div class="mb-3">
+      <h3 class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200">
+        <i class="fa-solid fa-gauge-high text-indigo-500"></i>
+        Tổng quan quản trị
+      </h3>
+      <p class="text-[10px] text-gray-500 mt-1">
+        Những điểm quan trọng cần nắm bắt
+      </p>
     </div>
 
     <div class="grid grid-cols-2 gap-2">
@@ -1627,13 +1636,15 @@ if (orgLevel !== 'LEADER') {
 
 <details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
 
-  <summary class="p-4 cursor-pointer flex items-center justify-between text-sm font-bold">
-    <span>
-      <i class="fa-solid fa-chart-pie text-indigo-500 mr-2"></i>
+  <summary class="p-4 cursor-pointer flex items-center justify-between">
+    <span class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200">
+      <i class="fa-solid fa-chart-pie text-indigo-500"></i>
       Xem phân tích chi tiết
     </span>
     <i class="fa-solid fa-chevron-down text-gray-400"></i>
   </summary>
+</details>
+
 
   <div class="p-3 space-y-4">
 
