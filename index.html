@@ -5524,14 +5524,27 @@ if (!window.canManageTask(task)) {
     }
 
     window.onload = function() {
-            const commonIssueInput = document.getElementById('task-common-issue-input');
+            
+      const commonIssueInput = document.getElementById('task-common-issue-input');
       const relatedDepartmentsWrap = document.getElementById('task-related-departments-wrap');
+      const departmentWrap = document.getElementById('task-department-wrap');
+      const departmentInput = document.getElementById('task-department-input');
+      const departmentRequiredMark = document.getElementById('task-department-required-mark');
 
-      if (commonIssueInput && relatedDepartmentsWrap) {
-        commonIssueInput.addEventListener('change', function() {
-          relatedDepartmentsWrap.classList.toggle('hidden', !this.checked);
-        });
+      const syncCommonIssueFields = () => {
+        const isCommon = commonIssueInput.checked;
+
+        relatedDepartmentsWrap.classList.toggle('hidden', !isCommon);
+        departmentWrap.classList.toggle('hidden', isCommon);
+        departmentInput.required = !isCommon;
+        departmentRequiredMark.classList.toggle('hidden', isCommon);
+      };
+
+      if (commonIssueInput && relatedDepartmentsWrap && departmentWrap && departmentInput) {
+        commonIssueInput.addEventListener('change', syncCommonIssueFields);
+        syncCommonIssueFields();
       }
+
       window.renderAll();
       window.checkUnacknowledgedTasks();
       updateNotificationPermissionLabel();
