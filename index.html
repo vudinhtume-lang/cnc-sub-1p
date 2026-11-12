@@ -1411,6 +1411,32 @@ if (orgLevel !== 'LEADER') {
     </p>
   </div>
 </div>
+  
+<!-- DEPARTMENT ATTENTION -->
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-amber-200 dark:border-amber-900">
+  <div class="flex items-center gap-2 mb-3">
+    <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">
+      Điểm cần chú ý
+    </h3>
+  </div>
+  <div id="department-attention-list" class="space-y-2">
+    <p class="text-xs text-gray-400 text-center py-2">Đang tổng hợp...</p>
+  </div>
+</div>
+
+<!-- DEPARTMENT ACTIONS -->
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
+  <div class="flex items-center gap-2 mb-3">
+    <i class="fa-solid fa-bullseye text-indigo-500"></i>
+    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">
+      Đề xuất hành động
+    </h3>
+  </div>
+  <div id="department-action-list" class="space-y-2">
+    <p class="text-xs text-gray-400 text-center py-2">Đang tổng hợp...</p>
+  </div>
+</div>
 </div>
     </section>
 
@@ -3990,6 +4016,132 @@ window.renderExecutiveOverview = function() {
     );
 
     departmentOverviewEl.innerHTML = departmentCards.join('');
+    
+    // V16.5 - Department Attention & Action
+    const attentionEl = document.getElementById(
+      'department-attention-list'
+    );
+    const actionEl = document.getElementById(
+      'department-action-list'
+    );
+
+    if (attentionEl && actionEl) {
+      const isLate = t =>
+        t.status !== 'done' &&
+        t.deadline &&
+        !isNaN(new Date(t.deadline).getTime()) &&
+        new Date(t.deadline) < now;
+
+      const getAttentionStats = list => {
+        const open = list.filter(t => t.status !== 'done');
+
+        return {
+          open: open.length,
+          overdue: open.filter(isLate).length,
+          high: open.filter(t => t.priority === 'high').length,
+          unack: open.filter(t => !t.acknowledged).length
+        };
+      };
+
+      const attentionItems = departmentList.map(dept => {
+        const deptTasks = tasks.filter(t =>
+          t.department === dept.id &&
+          t.commonIssue !== true
+        );
+
+        const stats = getAttentionStats(deptTasks);
+
+        let action = '';
+
+        if (stats.overdue > 0) {
+          action = 'Yêu cầu cập nhật nguyên nhân trễ hạn, phương án khắc phục và thời hạn hoàn thành.';
+        } else if (stats.high > 0) {
+          action = 'Theo dõi sát nhiệm vụ ưu tiên cao, xác nhận nguồn lực và tiến độ.';
+        } else if (stats.unack > 0) {
+          action = 'Nhắc người nhận xác nhận nhiệm vụ và cam kết thời điểm triển khai.';
+        }
+
+        return {
+          name: dept.name,
+          ...stats,
+          action
+        };
+      }).filter(item =>
+        item.overdue > 0 ||
+        item.high > 0 ||
+        item.unack > 0
+      );
+
+      // Vấn đề chung liên bộ phận
+      const commonStats = getAttentionStats(commonTasks);
+
+      if (commonStats.open > 0) {
+        attentionItems.push({
+          name: 'Vấn đề chung',
+          ...commonStats,
+          action: commonStats.overdue > 0
+            ? 'Tổ chức rà soát liên bộ phận, thống nhất đầu mối và thời hạn xử lý.'
+            : 'Thống nhất đầu mối điều phối và theo dõi tiến độ giữa các bộ phận.'
+        });
+      }
+
+      // Ưu tiên vấn đề nghiêm trọng trước
+      attentionItems.sort((a, b) =>
+        b.overdue - a.overdue ||
+        b.high - a.high ||
+        b.unack - a.unack
+      );
+
+      attentionEl.innerHTML = attentionItems.length
+        ? attentionItems.slice(0, 5).map(item => `
+            <div class="rounded-lg border border-amber-100 dark:border-amber-900/50 p-3">
+              <div class="flex justify-between items-center gap-2">
+                <strong class="text-xs">${item.name}</strong>
+                <span class="text-[10px] font-bold ${
+                  item.overdue > 0
+                    ? 'text-red-600'
+                    : 'text-amber-600'
+                }">
+                  ${item.overdue > 0
+                    ? `${item.overdue} quá hạn`
+                    : `${item.open} đang mở`}
+                </span>
+              </div>
+              <p class="text-[10px] text-gray-500 mt-1">
+                Chưa hoàn thành: ${item.open}
+                · Ưu tiên cao: ${item.high}
+                · Chưa xác nhận: ${item.unack}
+              </p>
+            </div>
+          `).join('')
+        : `
+          <p class="text-xs text-emerald-600 text-center py-3">
+            <i class="fa-solid fa-circle-check mr-1"></i>
+            Không có cảnh báo nổi bật cần ưu tiên.
+          </p>
+        `;
+
+      actionEl.innerHTML = attentionItems.length
+        ? attentionItems.slice(0, 5).map((item, index) => `
+            <div class="flex gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/40">
+              <span class="w-5 h-5 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-[10px] font-bold">
+                ${index + 1}
+              </span>
+              <div>
+                <p class="text-xs font-bold">${item.name}</p>
+                <p class="text-[11px] text-gray-600 dark:text-gray-300 mt-1">
+                  ${item.action}
+                </p>
+              </div>
+            </div>
+          `).join('')
+        : `
+          <p class="text-xs text-gray-500 text-center py-3">
+            Duy trì theo dõi tiến độ và kiểm tra các nhiệm vụ theo kế hoạch.
+          </p>
+        `;
+    }
+
   }
   // V16.4 - Report Department Analysis
   const reportDepartmentEl = document.getElementById(
