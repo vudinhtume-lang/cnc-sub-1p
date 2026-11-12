@@ -1362,24 +1362,6 @@ if (orgLevel !== 'LEADER') {
   </div>
 
 </div>
-<!-- TÌNH HÌNH THEO BỘ PHẬN -->
-<div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
-  <div class="mb-3">
-    <h3 class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200">
-      <i class="fa-solid fa-layer-group text-indigo-500"></i>
-      Tình hình theo bộ phận
-    </h3>
-    <p class="text-[10px] text-gray-500 mt-1">
-      Tổng hợp tình trạng công việc của 5 bộ phận
-    </p>
-  </div>
-
-  <div id="executive-department-overview" class="grid grid-cols-2 gap-2">
-    <p class="col-span-2 text-xs text-gray-400 text-center py-3">
-      Đang chờ dữ liệu...
-    </p>
-  </div>
-</div>
       <!-- Overdue Alert Banner -->
       <div id="overdue-banner" class="hidden bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl p-3 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -1410,18 +1392,25 @@ if (orgLevel !== 'LEADER') {
 
 <!-- CONTROL TOWER - DEPARTMENT MODE -->
 <div id="dashboard-mode-department" class="hidden space-y-4">
-  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
-    <h3 class="font-bold text-sm">
-      <i class="fa-solid fa-layer-group text-indigo-500 mr-1"></i>
-      Điều hành theo bộ phận
+  
+<!-- DEPARTMENT OVERVIEW -->
+<div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
+  <div class="mb-3">
+    <h3 class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-200">
+      <i class="fa-solid fa-layer-group text-indigo-500"></i>
+      Tình hình theo bộ phận
     </h3>
-    <p class="text-xs text-gray-500 mt-1">
-      Tổng hợp tình hình 5 bộ phận, vấn đề chung và các hành động cần ưu tiên.
-    </p>
-    <p class="text-xs text-gray-400 text-center py-6">
-      Đang chuẩn bị dữ liệu điều hành theo bộ phận...
+    <p class="text-[10px] text-gray-500 mt-1">
+      Tổng hợp tình trạng công việc của 5 bộ phận và vấn đề chung
     </p>
   </div>
+
+  <div id="executive-department-overview" class="grid grid-cols-2 gap-2">
+    <p class="col-span-2 text-xs text-gray-400 text-center py-3">
+      Đang chờ dữ liệu...
+    </p>
+  </div>
+</div>
 </div>
     </section>
 
