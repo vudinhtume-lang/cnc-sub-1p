@@ -1817,32 +1817,129 @@ if (orgLevel !== 'LEADER') {
 
      <!-- SECTION 1: XU HƯỚNG -->
     <div id="report-section-trend">
-    <!-- BIỂU ĐỒ XU HƯỚNG -->
-    <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3">
-      <div class="mb-3">
-        <h3 class="font-bold text-sm">Xu hướng công việc</h3>
-        <p class="text-[10px] text-gray-500 mt-1">
-          So sánh nhiệm vụ tạo mới và hoàn thành
-        </p>
-      </div>
+    <!-- SMART TREND -->
+<div class="space-y-3">
 
-      <div class="flex items-center gap-4 mb-3 text-[10px]">
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>
-          Nhiệm vụ tạo mới
-        </div>
-        <div class="flex items-center gap-1">
-          <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
-          Nhiệm vụ hoàn thành
-        </div>
-      </div>
+  <!-- TIÊU ĐỀ -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h3 class="font-bold text-sm">SMART TREND</h3>
+      <p class="text-[10px] text-gray-500 mt-1">
+        Xu hướng và hiệu quả thực hiện nhiệm vụ
+      </p>
+    </div>
+    <span class="text-[10px] font-semibold text-blue-600
+      bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-full">
+      SMART ANALYSIS
+    </span>
+  </div>
 
-      <div id="kpi-trend-chart" class="w-full min-h-[190px]">
-        <p class="text-xs text-gray-400 text-center py-10">
-          Đang chờ dữ liệu biểu đồ...
-        </p>
+  <!-- 4 KPI CARDS -->
+  <div class="grid grid-cols-2 gap-2">
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+      <p class="text-[10px] text-gray-500">Tổng nhiệm vụ</p>
+      <p id="smart-trend-total" class="text-2xl font-bold mt-1">--</p>
+      <p id="smart-trend-total-change" class="text-[10px] text-gray-500 mt-1">
+        So với kỳ trước
+      </p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+      <p class="text-[10px] text-gray-500">Tỷ lệ hoàn thành</p>
+      <p id="smart-trend-completion" class="text-2xl font-bold text-emerald-600 mt-1">--%</p>
+      <p id="smart-trend-completion-change" class="text-[10px] text-gray-500 mt-1">
+        So với kỳ trước
+      </p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+      <p class="text-[10px] text-gray-500">Nhiệm vụ quá hạn</p>
+      <p id="smart-trend-overdue" class="text-2xl font-bold text-rose-600 mt-1">--</p>
+      <p id="smart-trend-overdue-change" class="text-[10px] text-gray-500 mt-1">
+        So với kỳ trước
+      </p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+      <p class="text-[10px] text-gray-500">Tỷ lệ đúng hạn</p>
+      <p id="smart-trend-ontime" class="text-2xl font-bold mt-1">--%</p>
+      <p id="smart-trend-ontime-change" class="text-[10px] text-gray-500 mt-1">
+        So với kỳ trước
+      </p>
+    </div>
+
+  </div>
+
+  <!-- COMPLETION PROGRESS -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs font-semibold">Tiến độ hoàn thành</span>
+      <span id="smart-trend-progress-label"
+        class="text-sm font-bold text-emerald-600">--%</span>
+    </div>
+    <div class="h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div id="smart-trend-progress-bar"
+        class="h-full bg-emerald-500 rounded-full transition-all"
+        style="width:0%">
       </div>
     </div>
+  </div>
+
+  <!-- TREND CHART -->
+  <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-3">
+    <div class="mb-3">
+      <h3 class="font-bold text-sm">Biểu đồ xu hướng</h3>
+      <p class="text-[10px] text-gray-500 mt-1">
+        Khối lượng nhiệm vụ và tỷ lệ hoàn thành theo thời gian
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3 text-[10px]">
+      <div class="flex items-center gap-1">
+        <span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>
+        Nhiệm vụ tạo mới
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
+        Nhiệm vụ hoàn thành
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="w-4 h-0.5 rounded bg-orange-500"></span>
+        Tỷ lệ hoàn thành (%)
+      </div>
+    </div>
+
+    <div id="kpi-trend-chart" class="w-full min-h-[190px]">
+      <p class="text-xs text-gray-400 text-center py-10">
+        Đang chờ dữ liệu biểu đồ...
+      </p>
+    </div>
+  </div>
+
+  <!-- SMART INSIGHT -->
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-indigo-200 dark:border-indigo-900">
+    <div class="flex items-center gap-2 mb-2">
+      <i class="fa-solid fa-lightbulb text-indigo-500"></i>
+      <span class="text-sm font-bold">SMART Insight</span>
+    </div>
+    <div id="smart-trend-insight" class="text-xs leading-relaxed">
+      Đang chờ phân tích dữ liệu...
+    </div>
+  </div>
+
+  <!-- DETAILED ANALYSIS -->
+  <details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+    <summary class="cursor-pointer p-3 text-xs font-semibold">
+      Xem phân tích chi tiết
+    </summary>
+    <div id="smart-trend-details"
+      class="px-3 pb-3 text-xs leading-relaxed">
+      Nội dung phân tích chi tiết sẽ được cập nhật.
+    </div>
+  </details>
+
+</div>
   </div>
 
         <!-- SECTION 2: ĐIỂM NGHẼN -->
