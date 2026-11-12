@@ -2579,6 +2579,24 @@ window.openMemberTasks = function(memberId) {
 
   window.setTaskFilter('status', 'all');
 };
+    // V16.6 - Open tasks by department
+window.openDepartmentTasks = function(departmentId) {
+  window.quickRoleMode = 'all';
+
+  window.switchTab('tasks');
+
+  const deptSelect = document.getElementById('filter-department-select');
+  const assigneeSelect = document.getElementById('filter-assignee-select');
+  const prioritySelect = document.getElementById('filter-priority-select');
+  const search = document.getElementById('task-search-input');
+
+  if (deptSelect) deptSelect.value = departmentId;
+  if (assigneeSelect) assigneeSelect.value = 'all';
+  if (prioritySelect) prioritySelect.value = 'all';
+  if (search) search.value = '';
+
+  window.setTaskFilter('status', 'all');
+};
     window.switchTab = function(tabName) {
       window.currentTab = tabName;
      ['dashboard', 'tasks', 'add-task', 'reminders', 'reports', 'settings'].forEach(t => {
@@ -3930,9 +3948,11 @@ window.renderExecutiveOverview = function() {
       };
     };
 
-    const renderDepartmentCard = (name, stats, extra = '') => `
-      <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-        <div class="flex justify-between items-center gap-1">
+    const renderDepartmentCard = (name, stats, extra = '', departmentId = '') => `
+  <div
+    ${departmentId ? `onclick="openDepartmentTasks('${departmentId}')"` : ''}
+    class="rounded-lg border border-gray-200 dark:border-gray-700 p-3 ${departmentId ? 'cursor-pointer hover:border-indigo-400 active:scale-[0.99] transition' : ''}"
+  >        <div class="flex justify-between items-center gap-1">
           <strong class="text-xs">${name}</strong>
           <span class="text-xs font-bold ${
             stats.rate === 100
@@ -3976,9 +3996,11 @@ window.renderExecutiveOverview = function() {
       );
 
       return renderDepartmentCard(
-        dept.name,
-        getDepartmentStats(deptTasks)
-      );
+  dept.name,
+  getDepartmentStats(deptTasks),
+  '',
+  dept.id
+);
     });
 
     const commonTasks = tasks.filter(t => t.commonIssue === true);
@@ -4008,12 +4030,13 @@ window.renderExecutiveOverview = function() {
     `;
 
     departmentCards.unshift(
-      renderDepartmentCard(
-        'Vấn đề chung',
-        getDepartmentStats(commonTasks),
-        commonExtra
-      )
-    );
+  renderDepartmentCard(
+    'Vấn đề chung',
+    getDepartmentStats(commonTasks),
+    commonExtra,
+    'common'
+  )
+);
 
     departmentOverviewEl.innerHTML = departmentCards.join('');
     
