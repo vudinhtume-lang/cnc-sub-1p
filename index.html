@@ -2600,6 +2600,16 @@ window.openDepartmentTasks = function(departmentId) {
 
   window.setTaskFilter('status', 'all');
 };
+    // V16.8 - Filter tasks by assignee from department summary
+window.filterDepartmentTasksByAssignee = function(memberId) {
+  const assigneeSelect = document.getElementById('filter-assignee-select');
+  const search = document.getElementById('task-search-input');
+
+  if (assigneeSelect) assigneeSelect.value = memberId;
+  if (search) search.value = '';
+
+  window.setTaskFilter('status', 'all');
+};
     window.switchTab = function(tabName) {
       window.currentTab = tabName;
      ['dashboard', 'tasks', 'add-task', 'reminders', 'reports', 'settings'].forEach(t => {
@@ -5056,9 +5066,10 @@ const departmentVal = document.getElementById('filter-department-select')?.value
 
             if (!workloadMap[id]) {
               workloadMap[id] = {
-                name: member?.name || t.assigneeName || 'Chưa giao',
-                count: 0
-              };
+  id: id,
+  name: member?.name || t.assigneeName || 'Chưa giao',
+  count: 0
+};
             }
 
             workloadMap[id].count++;
@@ -5068,18 +5079,26 @@ const departmentVal = document.getElementById('filter-department-select')?.value
             .sort((a, b) => b.count - a.count);
 
           const peopleHtml = workload.length
-            ? workload.slice(0, 5).map(person => `
-                <span class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-[10px] text-gray-700 dark:text-gray-300">
-                  <i class="fa-solid fa-user text-gray-400"></i>
-                  ${person.name}
-                  <strong class="text-indigo-600">${person.count}</strong>
-                </span>
-              `).join('') +
-              (workload.length > 5
-                ? `<span class="text-[10px] text-gray-500">+${workload.length - 5} người khác</span>`
-                : '')
-            : '<span class="text-[10px] text-gray-400">Chưa có người phụ trách</span>';
-
+  ? workload.slice(0, 5).map(person => `
+      ${person.id !== 'unassigned'
+        ? `<button type="button"
+            onclick="filterDepartmentTasksByAssignee('${encodeURIComponent(person.id)}')"
+            class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 border border-indigo-100 dark:border-gray-700 rounded-lg px-2 py-1 text-[10px] text-gray-700 dark:text-gray-300 hover:border-indigo-400 active:scale-95 transition">
+            <i class="fa-solid fa-user text-indigo-500"></i>
+            ${person.name}
+            <strong class="text-indigo-600">${person.count}</strong>
+          </button>`
+        : `<span class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-[10px] text-gray-500">
+            <i class="fa-solid fa-user-slash"></i>
+            ${person.name}
+            <strong>${person.count}</strong>
+          </span>`
+      }
+    `).join('') +
+    (workload.length > 5
+      ? `<span class="text-[10px] text-gray-500">+${workload.length - 5} người khác</span>`
+      : '')
+  : '<span class="text-[10px] text-gray-400">Chưa có người phụ trách</span>';
           summaryEl.classList.remove('hidden');
 
           summaryEl.innerHTML = `
