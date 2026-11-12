@@ -1242,7 +1242,21 @@ if (orgLevel !== 'LEADER') {
 
     <!-- TAB 1: DASHBOARD OVERVIEW -->
     <section id="view-dashboard" class="space-y-4">
-      
+    
+<!-- CONTROL TOWER - MODE SELECTOR -->
+<div class="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl grid grid-cols-2 gap-1 text-xs font-bold shadow-inner">
+  <button type="button" onclick="toggleDashboardMode('task')" id="dashboard-mode-task-btn"
+    class="py-2 rounded-lg bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm">
+    <i class="fa-solid fa-list-check mr-1"></i> Theo Task
+  </button>
+  <button type="button" onclick="toggleDashboardMode('department')" id="dashboard-mode-dept-btn"
+    class="py-2 rounded-lg text-gray-600 dark:text-gray-400">
+    <i class="fa-solid fa-layer-group mr-1"></i> Theo bộ phận
+  </button>
+</div>
+
+<div id="dashboard-mode-task">
+  
       <!-- QUICK VIEW TOGGLE BAR FOR MOBILE SUB-MANAGERS -->
       <div class="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl flex text-xs font-semibold shadow-inner">
         <button onclick="toggleQuickRoleView('all')" id="toggle-view-all" class="w-1/2 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 shadow-sm bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-300 font-bold">
@@ -1391,6 +1405,23 @@ if (orgLevel !== 'LEADER') {
         <div id="dashboard-members-list" class="space-y-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-1">
         </div>
       </div>
+      </div>
+
+<!-- CONTROL TOWER - DEPARTMENT MODE -->
+<div id="dashboard-mode-department" class="hidden space-y-4">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-indigo-200 dark:border-indigo-900">
+    <h3 class="font-bold text-sm">
+      <i class="fa-solid fa-layer-group text-indigo-500 mr-1"></i>
+      Điều hành theo bộ phận
+    </h3>
+    <p class="text-xs text-gray-500 mt-1">
+      Tổng hợp tình hình 5 bộ phận, vấn đề chung và các hành động cần ưu tiên.
+    </p>
+    <p class="text-xs text-gray-400 text-center py-6">
+      Đang chuẩn bị dữ liệu điều hành theo bộ phận...
+    </p>
+  </div>
+</div>
     </section>
 
     <!-- TAB 2: TASK MANAGEMENT LIST -->
@@ -2555,6 +2586,26 @@ window.openMemberTasks = function(memberId) {
       window.renderAll();
     }
 
+// CONTROL TOWER - SWITCH DASHBOARD MODE
+window.toggleDashboardMode = function(mode) {
+  const taskView = document.getElementById('dashboard-mode-task');
+  const departmentView = document.getElementById('dashboard-mode-department');
+  const taskBtn = document.getElementById('dashboard-mode-task-btn');
+  const deptBtn = document.getElementById('dashboard-mode-dept-btn');
+
+  if (!taskView || !departmentView || !taskBtn || !deptBtn) return;
+
+  taskView.classList.toggle('hidden', mode !== 'task');
+  departmentView.classList.toggle('hidden', mode !== 'department');
+
+  taskBtn.className = mode === 'task'
+    ? 'py-2 rounded-lg bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
+    : 'py-2 rounded-lg text-gray-600 dark:text-gray-400';
+
+  deptBtn.className = mode === 'department'
+    ? 'py-2 rounded-lg bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm'
+    : 'py-2 rounded-lg text-gray-600 dark:text-gray-400';
+};
     window.toggleQuickRoleView = function(mode) {
       window.quickRoleMode = mode;
       const btnAll = document.getElementById('toggle-view-all');
