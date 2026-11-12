@@ -2605,7 +2605,7 @@ window.filterDepartmentTasksByAssignee = function(memberId) {
   const assigneeSelect = document.getElementById('filter-assignee-select');
   const search = document.getElementById('task-search-input');
 
-  if (assigneeSelect) assigneeSelect.value = memberId;
+  if (assigneeSelect) assigneeSelect.value = decodeURIComponent(memberId);
   if (search) search.value = '';
 
   window.setTaskFilter('status', 'all');
