@@ -1243,6 +1243,33 @@ if (orgLevel !== 'LEADER') {
     <!-- TAB 1: DASHBOARD OVERVIEW -->
     <section id="view-dashboard" class="space-y-4">
     
+
+<!-- Welcome Card - ALWAYS VISIBLE -->
+<div class="bg-gradient-to-r from-brand-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+  <div class="absolute -right-4 -bottom-4 opacity-15 text-8xl">
+    <i class="fa-solid fa-industry"></i>
+  </div>
+  <div class="relative z-10">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium backdrop-blur-sm" id="dash-role-tag">Tài khoản</span>
+      <span class="text-xs opacity-80" id="current-date-text">Hôm nay</span>
+    </div>
+    <h2 class="text-lg font-bold" id="dash-greeting">Xin chào!</h2>
+    <p class="text-xs opacity-90 mt-0.5">Tiến độ vận hành ca sản xuất bộ phận CNC SUB 1P</p>
+
+    <!-- Progress Bar -->
+    <div class="mt-4">
+      <div class="flex justify-between text-xs font-semibold mb-1">
+        <span>Tiến độ hoàn thành</span>
+        <span id="overall-progress-text">0%</span>
+      </div>
+      <div class="w-full bg-black/20 rounded-full h-2.5 overflow-hidden p-0.5 backdrop-blur-sm">
+        <div id="overall-progress-bar" class="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CONTROL TOWER - MODE SELECTOR -->
 <div class="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl grid grid-cols-2 gap-1 text-xs font-bold shadow-inner">
   <button type="button" onclick="toggleDashboardMode('task')" id="dashboard-mode-task-btn"
@@ -1256,42 +1283,16 @@ if (orgLevel !== 'LEADER') {
 </div>
 
 <div id="dashboard-mode-task">
-  
-      <!-- QUICK VIEW TOGGLE BAR FOR MOBILE SUB-MANAGERS -->
-      <div class="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl flex text-xs font-semibold shadow-inner">
-        <button onclick="toggleQuickRoleView('all')" id="toggle-view-all" class="w-1/2 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 shadow-sm bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-300 font-bold">
-          <i class="fa-solid fa-users text-xs"></i> Toàn Bộ Phận
-        </button>
-        <button onclick="toggleQuickRoleView('my_tasks')" id="toggle-view-my" class="w-1/2 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-gray-600 dark:text-gray-400 font-medium">
-          <i class="fa-solid fa-user-check text-xs"></i> Nhiệm Vụ Của Tôi
-        </button>
-      </div>
 
-      <!-- Welcome Card -->
-      <div class="bg-gradient-to-r from-brand-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
-        <div class="absolute -right-4 -bottom-4 opacity-15 text-8xl">
-          <i class="fa-solid fa-industry"></i>
-        </div>
-        <div class="relative z-10">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-medium backdrop-blur-sm" id="dash-role-tag">Tài khoản</span>
-            <span class="text-xs opacity-80" id="current-date-text">Hôm nay</span>
-          </div>
-          <h2 class="text-lg font-bold" id="dash-greeting">Xin chào!</h2>
-          <p class="text-xs opacity-90 mt-0.5">Tiến độ vận hành ca sản xuất bộ phận CNC SUB 1P</p>
-
-          <!-- Progress Bar -->
-          <div class="mt-4">
-            <div class="flex justify-between text-xs font-semibold mb-1">
-              <span>Tiến độ hoàn thành</span>
-              <span id="overall-progress-text">0%</span>
-            </div>
-            <div class="w-full bg-black/20 rounded-full h-2.5 overflow-hidden p-0.5 backdrop-blur-sm">
-              <div id="overall-progress-bar" class="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- QUICK VIEW TOGGLE BAR FOR MOBILE SUB-MANAGERS -->
+  <div class="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl flex text-xs font-semibold shadow-inner">
+    <button onclick="toggleQuickRoleView('all')" id="toggle-view-all" class="w-1/2 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 shadow-sm bg-white dark:bg-gray-700 text-brand-600 dark:text-brand-300 font-bold">
+      <i class="fa-solid fa-users text-xs"></i> Toàn Bộ Phận
+    </button>
+    <button onclick="toggleQuickRoleView('my_tasks')" id="toggle-view-my" class="w-1/2 py-2 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 text-gray-600 dark:text-gray-400 font-medium">
+      <i class="fa-solid fa-user-check text-xs"></i> Nhiệm Vụ Của Tôi
+    </button>
+  </div>
 
       <!-- Quick Metrics Grid -->
       <div class="grid grid-cols-2 gap-3">
