@@ -1480,7 +1480,10 @@ if (orgLevel !== 'LEADER') {
   </select>
 </div>
       </div>
-
+<!-- V16.7 - Department Task Summary -->
+<div id="department-task-summary"
+     class="hidden bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 rounded-xl p-3 space-y-3">
+</div>
             <div class="flex items-center justify-between gap-2">
   <div id="tasks-result-count" class="text-[11px] text-gray-500 dark:text-gray-400 px-1">
     Đang hiển thị 0 công việc
@@ -5009,7 +5012,116 @@ const departmentVal = document.getElementById('filter-department-select')?.value
           return t.title.toLowerCase().includes(searchVal) || ((assignee?.name || t.assigneeName || '').toLowerCase().includes(searchVal));
         });
       }
+      // V16.7 - Department Task Summary
+      const summaryEl = document.getElementById('department-task-summary');
 
+      if (summaryEl) {
+        if (departmentVal === 'all') {
+          summaryEl.classList.add('hidden');
+          summaryEl.innerHTML = '';
+        } else {
+          const summaryTasks = (window.tasks || []).filter(t => {
+            if (departmentVal === 'common') {
+              return t.commonIssue === true;
+            }
+
+            if (t.commonIssue === true) {
+              return t.department === departmentVal ||
+                (t.relatedDepartments || []).includes(departmentVal);
+            }
+
+            return t.department === departmentVal;
+          });
+
+          const total = summaryTasks.length;
+          const done = summaryTasks.filter(t => t.status === 'done').length;
+          const inProgress = summaryTasks.filter(t => t.status === 'in_progress').length;
+          const todo = total - done - inProgress;
+          const overdue = summaryTasks.filter(t => isOverdue(t)).length;
+
+          const departmentNames = {
+            common: 'Vấn đề chung',
+            DEBURRING: 'Deburring',
+            BLASTING: 'Blasting',
+            LASER: 'Laser',
+            DIPPING_14: 'Dipping 14 Bath',
+            DIPPING_8: 'Dipping 8 Bath'
+          };
+
+          const workloadMap = {};
+
+          summaryTasks.forEach(t => {
+            const id = t.assigneeId || 'unassigned';
+            const member = (window.members || []).find(m => m.id === id);
+
+            if (!workloadMap[id]) {
+              workloadMap[id] = {
+                name: member?.name || t.assigneeName || 'Chưa giao',
+                count: 0
+              };
+            }
+
+            workloadMap[id].count++;
+          });
+
+          const workload = Object.values(workloadMap)
+            .sort((a, b) => b.count - a.count);
+
+          const peopleHtml = workload.length
+            ? workload.slice(0, 5).map(person => `
+                <span class="inline-flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg px-2 py-1 text-[10px] text-gray-700 dark:text-gray-300">
+                  <i class="fa-solid fa-user text-gray-400"></i>
+                  ${person.name}
+                  <strong class="text-indigo-600">${person.count}</strong>
+                </span>
+              `).join('') +
+              (workload.length > 5
+                ? `<span class="text-[10px] text-gray-500">+${workload.length - 5} người khác</span>`
+                : '')
+            : '<span class="text-[10px] text-gray-400">Chưa có người phụ trách</span>';
+
+          summaryEl.classList.remove('hidden');
+
+          summaryEl.innerHTML = `
+            <div class="flex justify-between items-center">
+              <strong class="text-xs text-indigo-800 dark:text-indigo-300">
+                <i class="fa-solid fa-chart-simple mr-1"></i>
+                Tổng hợp ${departmentNames[departmentVal] || 'bộ phận'}
+              </strong>
+              <span class="text-[10px] text-gray-500">${total} nhiệm vụ</span>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div>
+                <strong class="block text-base">${todo}</strong>
+                <span class="text-[9px] text-gray-500">Chưa làm</span>
+              </div>
+              <div>
+                <strong class="block text-base text-blue-600">${inProgress}</strong>
+                <span class="text-[9px] text-gray-500">Đang làm</span>
+              </div>
+              <div>
+                <strong class="block text-base text-emerald-600">${done}</strong>
+                <span class="text-[9px] text-gray-500">Hoàn thành</span>
+              </div>
+              <div>
+                <strong class="block text-base text-red-600">${overdue}</strong>
+                <span class="text-[9px] text-gray-500">Quá hạn</span>
+              </div>
+            </div>
+
+            <div class="border-t border-indigo-100 dark:border-indigo-900 pt-2">
+              <p class="text-[10px] font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
+                <i class="fa-solid fa-users mr-1"></i>
+                Người phụ trách (${workload.length})
+              </p>
+              <div class="flex flex-wrap gap-1.5">
+                ${peopleHtml}
+              </div>
+            </div>
+          `;
+        }
+    }
             const resultCountEl = document.getElementById('tasks-result-count');
             // SORT TASKS BY DEADLINE: nearest first
       filtered.sort((a, b) => {
