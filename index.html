@@ -1748,11 +1748,11 @@ if (orgLevel !== 'LEADER') {
       <p class="text-[10px] text-gray-500 mt-1">Đã xử lý xong</p>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
       <p class="text-[10px] text-gray-500">Hoàn thành đúng hạn</p>
-      <p id="kpi-on-time" class="text-2xl font-bold text-blue-600 mt-1">0</p>
-      <p class="text-[10px] text-gray-500 mt-1">Đúng Deadline</p>
-    </div>
+      <p id="kpi-on-time" class="text-2xl font-bold text-blue-600 mt-1">0%</p>
+      <p class="text-[10px] text-gray-500 mt-1">Trên tổng nhiệm vụ đã hoàn thành</p>
+        </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-700">
       <p class="text-[10px] text-gray-500">Quá hạn</p>
@@ -3337,7 +3337,7 @@ const memberStats = subMembers.map(m => {
   if (!window.loggedInUser) {
     totalEl.innerText = '0';
     doneEl.innerText = '0';
-    onTimeEl.innerText = '0';
+    onTimeEl.innerText = '0%';
     overdueEl.innerText = '0';
     rateEl.innerText = '0%';
     barEl.style.width = '0%';
@@ -3961,7 +3961,7 @@ trendScroll.dataset.focusX = xCenter(safeIndex);
 
   totalEl.innerText = total;
   doneEl.innerText = doneTasks.length;
-  onTimeEl.innerText = onTime;
+  onTimeEl.innerText = `${onTimeRate}%`;
   overdueEl.innerText = overdue;
   rateEl.innerText = `${completionRate}%`;
   barEl.style.width = `${completionRate}%`;
