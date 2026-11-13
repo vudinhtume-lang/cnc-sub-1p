@@ -3529,10 +3529,31 @@ const memberStats = subMembers.map(m => {
         `;
       }).join('');
 
-      const ratePoints = data.map((d, i) =>
-        `${xCenter(i)},${yRate(d.rate)}`
-      ).join(' ');
+      const ratePath = data.map((d, i) => {
+  const x = xCenter(i);
+  const y = yRate(d.rate);
 
+  if (i === 0) return `M ${x} ${y}`;
+
+  const p0 = data[Math.max(0, i - 2)];
+  const p1 = data[i - 1];
+  const p2 = d;
+  const p3 = data[Math.min(data.length - 1, i + 1)];
+
+  const x1 = xCenter(i - 1);
+  const y1 = yRate(p1.rate);
+  const x0 = xCenter(Math.max(0, i - 2));
+  const y0 = yRate(p0.rate);
+  const x3 = xCenter(Math.min(data.length - 1, i + 1));
+  const y3 = yRate(p3.rate);
+
+  const c1x = x1 + (x - x0) / 6;
+  const c1y = y1 + (y - y0) / 6;
+  const c2x = x - (x3 - x1) / 6;
+  const c2y = y - (y3 - y1) / 6;
+
+  return `C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x} ${y}`;
+}).join(' ');
       const rateDots = data.map((d, i) => `
         <circle
           cx="${xCenter(i)}"
@@ -3555,13 +3576,13 @@ const memberStats = subMembers.map(m => {
             ${grid}
             ${bars}
 
-            <polyline
-              points="${ratePoints}"
-              fill="none"
-              stroke="#f59e0b"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"/>
+            <path
+  d="${ratePath}"
+  fill="none"
+  stroke="#f59e0b"
+  stroke-width="2.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"/>
 
             ${rateDots}
 
