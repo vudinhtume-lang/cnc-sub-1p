@@ -4990,7 +4990,17 @@ if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
 `;
 
   const members = (window.members || []).filter(m => !m.isManager);
-
+departmentEl.innerHTML = departmentStats.map(d => `
+  <div class="flex justify-between items-center gap-2 text-xs border-b border-gray-100 dark:border-gray-700 py-2">
+    <span class="font-semibold">${d.name}</span>
+    <span class="text-right">
+      <strong>${d.total}</strong> tồn đọng ·
+      <strong class="text-rose-600">${d.overdue}</strong> quá hạn ·
+      <span class="text-orange-600">${d.dueSoon}</span> sắp hạn ·
+      <span class="text-gray-500">${d.noDeadline}</span> thiếu hạn
+    </span>
+  </div>
+`).join('') || '<p class="text-xs text-gray-400">Chưa có nhiệm vụ theo bộ phận.</p>';
   const memberStats = members.map(member => {
     const memberTasks = tasks.filter(t => t.assigneeId === member.id);
     const memberOverdue = memberTasks.filter(t =>
