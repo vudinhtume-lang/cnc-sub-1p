@@ -276,6 +276,38 @@ async function syncManagerScopes(users) {
   }).join('');
 }
 
+    async function saveSmartNotification(type, title, body, taskId, eventKey = '') {
+  const uid = auth.currentUser?.uid;
+  if (!uid || !taskId) return;
+
+  const safePart = value =>
+    String(value).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+
+  const notificationId =
+    `${type}_${safePart(taskId)}_${safePart(eventKey || 'event')}`;
+
+  const notificationRef = doc(
+    db, 'users', uid, 'notifications', notificationId
+  );
+
+  try {
+    const existing = await getDoc(notificationRef);
+    if (existing.exists()) return;
+
+    await setDoc(notificationRef, {
+      type,
+      title,
+      body,
+      taskId: String(taskId),
+      createdAt: serverTimestamp(),
+      read: false
+    });
+
+    safeNotify(title, body, notificationId);
+  } catch (error) {
+    console.error('Lỗi lưu SMART NOTIFICATION:', error);
+  }
+    }
 window.markSmartNotificationRead = async function(id) {
   const uid = auth.currentUser?.uid;
   if (!uid || !id) return;
@@ -2715,15 +2747,22 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
         );
       }
       
-      if (
+            if (
         !old &&
         task.assigneeId === window.loggedInUser.id &&
         !task.acknowledged
       ) {
         const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'}`;
         window.showToast(msg, 'info');
-        safeNotify('CNC SUB 1P - Có nhiệm vụ mới', msg);
-      }
+
+        saveSmartNotification(
+          'new_task',
+          'CNC SUB 1P - Có nhiệm vụ mới',
+          msg,
+          task.id,
+          task.createdAt || 'created'
+        );
+            }
 
       if (
         old &&
