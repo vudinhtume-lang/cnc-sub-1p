@@ -63,7 +63,7 @@ import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, deleteDoc, u
     window.isCloudRealtimeActive = false;
     window._taskUnsubscribe = null;
     window._usersUnsubscribe = null;
-
+window._notificationUnsubscribe = null;
     const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').toLowerCase().trim().replace(/[^a-z0-9]+/g, '.').replace(/^\.|\.$/g, '');
     function emailFromManagerName(name) {
       const clean = name.trim().toLocaleLowerCase('vi-VN');
@@ -79,7 +79,8 @@ import { getFirestore, doc, getDoc, collection, onSnapshot, setDoc, deleteDoc, u
 
   if (window._taskUnsubscribe) window._taskUnsubscribe();
   if (window._usersUnsubscribe) window._usersUnsubscribe();
-
+if (window._notificationUnsubscribe) window._notificationUnsubscribe();
+window._notificationUnsubscribe = null;
   window._taskUnsubscribe = null;
   window._usersUnsubscribe = null;
     }
@@ -224,7 +225,70 @@ async function syncManagerScopes(users) {
       if (data.role === 'ADMIN' && user.uid !== ADMIN_UID) throw new Error('Tài khoản không được phép có quyền ADMIN.');
       return profileToMember(user.uid, data);
     }
-    
+  function renderSmartNotifications() {
+  const list = document.getElementById('smart-noti-list');
+  const badge = document.getElementById('smart-noti-unread-count');
+  if (!list || !badge) return;
+
+  const items = window.smartNotifications || [];
+  const unread = items.filter(n => !n.read).length;
+
+  badge.textContent = `${unread} chưa đọc`;
+
+  if (!items.length) {
+    list.innerHTML = `
+      <div class="text-center py-5 text-xs text-gray-400">
+        <i class="fa-regular fa-bell-slash text-xl mb-2 block"></i>
+        Chưa có thông báo mới.
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(n => {
+    const time = n.createdAt?.toDate
+      ? formatDateTime(n.createdAt.toDate().toISOString())
+      : '';
+
+    return `
+      <div class="rounded-xl border p-3 ${
+        n.read
+          ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+          : 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800'
+      }">
+        <div class="flex items-start justify-between gap-2">
+          <p class="text-xs font-bold text-gray-900 dark:text-white">
+            ${escapeHtml(n.title || 'Thông báo')}
+          </p>
+          ${n.read ? '' : '<span class="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1"></span>'}
+        </div>
+        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 whitespace-pre-line">
+          ${escapeHtml(n.body || '')}
+        </p>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-[10px] text-gray-400">${time}</span>
+          ${n.read ? '' : `
+            <button onclick="markSmartNotificationRead('${escapeHtml(n.id)}')"
+              class="text-[10px] font-semibold text-blue-600">
+              Đánh dấu đã đọc
+            </button>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+window.markSmartNotificationRead = async function(id) {
+  const uid = auth.currentUser?.uid;
+  if (!uid || !id) return;
+
+  try {
+    await updateDoc(
+      doc(db, 'users', uid, 'notifications', id),
+      { read: true }
+    );
+  } catch (error) {
+    window.showToast('Không cập nhật được thông báo: ' + error.message, 'warning');
+  }
+};  
 function startDataListeners(member) {
   stopListeners();
 
@@ -232,7 +296,30 @@ function startDataListeners(member) {
   window._knownCloudTasks = new Map();
   window._taskSnapshotSources = new Map();
   window._taskUnsubscribers = [];
+  window.smartNotifications = [];
 
+  window._notificationUnsubscribe = onSnapshot(
+    query(
+      collection(db, 'users', member.uid, 'notifications'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    ),
+    snapshot => {
+      window.smartNotifications = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      renderSmartNotifications();
+    },
+    error => {
+      console.error('SMART NOTIFICATION:', error);
+      window.showToast(
+        'Không tải được hộp thư thông báo: ' + error.message,
+        'warning'
+      );
+    }
+  );
   function listenTasks(taskQuery, source) {
     const unsubscribe = onSnapshot(taskQuery, (snapshot) => {
       const rows = snapshot.docs.map(d => ({
