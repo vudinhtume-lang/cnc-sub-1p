@@ -4936,12 +4936,18 @@ if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
     const memberOverdue = memberTasks.filter(t =>
       t.deadline && new Date(t.deadline) < now
     ).length;
-
+const memberDueSoon = memberTasks.filter(t => {
+  if (!t.deadline) return false;
+  const deadline = new Date(t.deadline);
+  return deadline >= now &&
+    deadline <= new Date(now.getTime() + 7 * 86400000);
+}).length;
     return {
-      name: member.name,
-      total: memberTasks.length,
-      overdue: memberOverdue
-    };
+  name: member.name,
+  total: memberTasks.length,
+  overdue: memberOverdue,
+  dueSoon: memberDueSoon
+};
   }).filter(m => m.total > 0);
 
   memberStats.sort((a, b) =>
@@ -4956,6 +4962,7 @@ if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
             ${m.total} tồn đọng ·
             <strong class="${m.overdue > 0 ? 'text-rose-600' : 'text-gray-500'}">
               ${m.overdue} quá hạn
+              · ${m.dueSoon} sắp đến hạn
             </strong>
           </span>
         </div>
