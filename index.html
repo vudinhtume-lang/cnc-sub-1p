@@ -3624,7 +3624,7 @@ const memberStats = subMembers.map(m => {
           0,
           Math.min(focusIndex, data.length - 1)
         );
-
+trendScroll.dataset.focusX = xCenter(safeIndex);
         trendScroll.scrollLeft = Math.max(
           0,
           xCenter(safeIndex) - trendScroll.clientWidth / 2
