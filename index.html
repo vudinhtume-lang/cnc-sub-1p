@@ -4916,7 +4916,43 @@ const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
 });
 
 const noDeadlineTasks = tasks.filter(t => !t.deadline);
+const departmentList = [
+  { id: 'DEBURRING', name: 'Deburring' },
+  { id: 'BLASTING', name: 'Blasting' },
+  { id: 'LASER', name: 'Laser' },
+  { id: 'DIPPING_14', name: 'Dipping 14 Bath' },
+  { id: 'DIPPING_8', name: 'Dipping 8 Bath' }
+];
 
+const departmentStats = departmentList.map(dept => {
+  const deptTasks = tasks.filter(t =>
+    t.department === dept.id && t.commonIssue !== true
+  );
+
+  const overdue = deptTasks.filter(t =>
+    t.deadline &&
+    !isNaN(new Date(t.deadline).getTime()) &&
+    new Date(t.deadline) < now
+  ).length;
+
+  const dueSoon = deptTasks.filter(t => {
+    if (!t.deadline) return false;
+    const deadline = new Date(t.deadline);
+    return !isNaN(deadline.getTime()) &&
+      deadline >= now &&
+      deadline <= new Date(now.getTime() + 7 * 86400000);
+  }).length;
+
+  const noDeadline = deptTasks.filter(t => !t.deadline).length;
+
+  return {
+    name: dept.name,
+    total: deptTasks.length,
+    overdue,
+    dueSoon,
+    noDeadline
+  };
+});
   unfinishedEl.innerText = tasks.length;
   overdueEl.innerText = overdueTasks.length;
   if (dueSoonEl) dueSoonEl.innerText = dueSoonTasks.length;
