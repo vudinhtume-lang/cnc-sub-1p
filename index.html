@@ -2621,7 +2621,54 @@ if (orgLevel !== 'LEADER') {
     }
 
 // V9: TỰ ĐỘNG NHẮC HẠN CÔNG VIỆC
+    async function checkAndSaveDeadlineNotifications() {
+  if (!window.loggedInUser || window._deadlineNotificationScan) return;
+
+  window._deadlineNotificationScan = true;
+
+  try {
+    const tasks = (window.tasks || []).filter(
+      t => t.assigneeId === window.loggedInUser.id &&
+           t.status !== 'done' &&
+           t.deadline
+    );
+
+    const now = Date.now();
+
+    for (const task of tasks) {
+      const deadline = new Date(task.deadline).getTime();
+      if (!Number.isFinite(deadline)) continue;
+
+      const remaining = deadline - now;
+      let type = '';
+      let title = '';
+
+      if (remaining <= 0) {
+        type = 'overdue';
+        title = 'CNC SUB 1P - Công việc quá hạn';
+      } else if (remaining <= 24 * 60 * 60 * 1000) {
+        type = 'due_soon';
+        title = 'CNC SUB 1P - Công việc sắp đến hạn';
+      } else {
+        continue;
+      }
+
+      const body = `${task.title || 'Công việc'}\nHạn: ${formatDateTime(task.deadline)}`;
+
+      await saveSmartNotification(
+        type,
+        title,
+        body,
+        task.id,
+        String(deadline)
+      );
+    }
+  } finally {
+    window._deadlineNotificationScan = false;
+  }
+    }
 function checkDeadlineNotifications() {
+    checkAndSaveDeadlineNotifications();
   if (
     !window.loggedInUser ||
     !('Notification' in window) ||
