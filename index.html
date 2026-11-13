@@ -4907,15 +4907,27 @@ if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
   const progressCount = tasks.filter(t => t.status === 'in_progress').length;
 
   statusEl.innerHTML = `
-    <div class="flex justify-between text-xs">
-      <span>Chưa làm</span>
-      <strong>${todoCount}</strong>
-    </div>
-    <div class="flex justify-between text-xs">
-      <span>Đang thực hiện</span>
-      <strong>${progressCount}</strong>
-    </div>
-  `;
+  <div class="flex justify-between text-xs">
+    <span>🔴 Quá hạn</span>
+    <strong class="text-rose-600">${overdueTasks.length}</strong>
+  </div>
+  <div class="flex justify-between text-xs">
+    <span>🟠 Sắp đến hạn</span>
+    <strong class="text-orange-600">${dueSoonTasks.length}</strong>
+  </div>
+  <div class="flex justify-between text-xs">
+    <span>⚪ Thiếu Deadline</span>
+    <strong class="text-gray-500">${noDeadlineTasks.length}</strong>
+  </div>
+  <div class="flex justify-between text-xs">
+    <span>Chưa làm</span>
+    <strong>${todoCount}</strong>
+  </div>
+  <div class="flex justify-between text-xs">
+    <span>Đang thực hiện</span>
+    <strong>${progressCount}</strong>
+  </div>
+`;
 
   const members = (window.members || []).filter(m => !m.isManager);
 
