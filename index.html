@@ -4836,11 +4836,20 @@ const noDeadline = list.filter(t =>
         b.stats.done - a.stats.done
     )[0];
 
-    const priorityDept = [...activeDeptRows].sort(
-      (a, b) =>
+    
+    const priorityDept = [...activeDeptRows].sort((a, b) => {
+      const riskA =
+        (a.stats.overdue / a.stats.total) * 70 +
+        (a.stats.open / a.stats.total) * 30;
+
+      const riskB =
+        (b.stats.overdue / b.stats.total) * 70 +
+        (b.stats.open / b.stats.total) * 30;
+
+      return riskB - riskA ||
         b.stats.overdue - a.stats.overdue ||
-        b.stats.open - a.stats.open
-    )[0];
+        b.stats.open - a.stats.open;
+    })[0];
 
     const commonDept = reportDeptData.find(
       d => d.name === 'Vấn đề chung'
