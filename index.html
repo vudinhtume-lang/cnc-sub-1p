@@ -2826,7 +2826,27 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
           task.createdAt || 'created'
         );
             }
+// SMART NOTIFICATION: NHIỆM VỤ ĐÃ HOÀN THÀNH
+if (
+  old &&
+  old.status !== 'done' &&
+  task.status === 'done' &&
+  task.createdBy === window.loggedInUser.uid
+) {
+  const assignee = (window.members || []).find(
+    m => m.id === task.assigneeId
+  );
 
+  const msg = `${assignee?.name || task.assigneeName || 'Nhân viên'} đã hoàn thành: ${task.title || 'Nhiệm vụ'}`;
+
+  saveSmartNotification(
+    'completed',
+    'CNC SUB 1P - Nhiệm vụ đã hoàn thành',
+    msg,
+    task.id,
+    task.completedAt || task.updateAt || 'completed'
+  );
+}
       if (
         old &&
         !old.acknowledged &&
