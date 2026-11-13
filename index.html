@@ -4953,6 +4953,11 @@ const departmentStats = departmentList.map(dept => {
     noDeadline
   };
 });
+  departmentStats.sort((a, b) =>
+  b.overdue - a.overdue ||
+  b.dueSoon - a.dueSoon ||
+  b.noDeadline - a.noDeadline
+);
   unfinishedEl.innerText = tasks.length;
   overdueEl.innerText = overdueTasks.length;
   if (dueSoonEl) dueSoonEl.innerText = dueSoonTasks.length;
