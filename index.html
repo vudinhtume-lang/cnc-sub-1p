@@ -3829,6 +3829,47 @@ const memberStats = subMembers.map(m => {
     smartPreviousOntimeRate,
     true
   );
+      
+  // SMART INSIGHT - Phân tích tình hình thực tế
+  const smartInsightEl = document.getElementById('smart-trend-insight');
+
+  if (smartInsightEl) {
+    if (total === 0) {
+      smartInsightEl.innerHTML =
+        '<p class="text-gray-500">Chưa có nhiệm vụ trong kỳ báo cáo để phân tích.</p>';
+    } else {
+      const remaining = total - doneTasks.length;
+      const insights = [];
+
+      if (overdue > 0) {
+        insights.push(
+          `<p class="text-rose-600 font-semibold">⚠ ${overdue} nhiệm vụ đang quá hạn. Cần ưu tiên xử lý.</p>`
+        );
+      }
+
+      if (remaining > 0) {
+        insights.push(
+          `<p>Còn ${remaining} nhiệm vụ chưa hoàn thành (${100 - completionRate}% khối lượng).</p>`
+        );
+      }
+
+      if (doneTasks.length > 0 && onTimeRate < 100) {
+        insights.push(
+          `<p>Tỷ lệ hoàn thành đúng hạn đạt ${onTimeRate}%. Cần chú ý tiến độ thực hiện.</p>`
+        );
+      }
+
+      if (insights.length === 0) {
+        insights.push(
+          '<p class="text-emerald-600 font-semibold">✓ Tất cả nhiệm vụ đã hoàn thành. Tiếp tục duy trì kết quả.</p>'
+        );
+      }
+
+      smartInsightEl.innerHTML =
+        `<div class="space-y-1">${insights.join('')}</div>`;
+    }
+  }
+
   totalEl.innerText = total;
   doneEl.innerText = doneTasks.length;
   onTimeEl.innerText = onTime;
