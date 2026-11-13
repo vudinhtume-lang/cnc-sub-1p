@@ -3613,6 +3613,34 @@ const memberStats = subMembers.map(m => {
           Cột trái: số nhiệm vụ · Trục phải: tỷ lệ %
         </p>
       `;
+            const trendSvg = trendEl.querySelector('svg');
+      const trendPopup = document.getElementById('smart-trend-popup');
+
+      trendSvg.addEventListener('click', event => {
+        const point = event.target.closest('[data-trend-index]');
+        if (!point) return;
+
+        const index = Number(point.dataset.trendIndex);
+        const type = point.dataset.trendType;
+        const d = data[index];
+        if (!d) return;
+
+        const selected = {
+          created: 'Nhiệm vụ tạo mới',
+          completed: 'Nhiệm vụ hoàn thành',
+          rate: 'Tỷ lệ hoàn thành'
+        }[type];
+
+        trendPopup.classList.remove('hidden');
+        trendPopup.innerHTML = `
+          <div class="font-semibold mb-2">${d.label} · ${selected}</div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div><b class="text-blue-500">${d.created}</b><p>Tạo mới</p></div>
+            <div><b class="text-emerald-500">${d.completed}</b><p>Hoàn thành</p></div>
+            <div><b class="text-amber-500">${d.rate}%</b><p>Tỷ lệ</p></div>
+          </div>
+        `;
+      });
     }
   }
 
