@@ -3567,7 +3567,7 @@ const memberStats = subMembers.map(m => {
       `).join('');
 
       trendEl.innerHTML = `
-        <div class="overflow-x-auto">
+        <div id="smart-trend-scroll" class="overflow-x-auto">
           <svg width="${chartWidth}"
             height="${chartHeight}"
             viewBox="0 0 ${chartWidth} ${chartHeight}"
@@ -3613,6 +3613,23 @@ const memberStats = subMembers.map(m => {
           Cột trái: số nhiệm vụ · Trục phải: tỷ lệ %
         </p>
       `;
+            const trendScroll = document.getElementById('smart-trend-scroll');
+
+      if (trendScroll) {
+        const focusIndex = dailyMode && period !== 'last_month'
+          ? now.getDate() - 1
+          : data.length - 1;
+
+        const safeIndex = Math.max(
+          0,
+          Math.min(focusIndex, data.length - 1)
+        );
+
+        trendScroll.scrollLeft = Math.max(
+          0,
+          xCenter(safeIndex) - trendScroll.clientWidth / 2
+        );
+    }
             const trendSvg = trendEl.querySelector('svg');
       const trendPopup = document.getElementById('smart-trend-popup');
 
