@@ -4467,14 +4467,27 @@ window.renderExecutiveOverview = function() {
         !isNaN(new Date(t.deadline).getTime()) &&
         new Date(t.deadline) < now
       ).length;
+      const dueSoon = list.filter(t => {
+  if (t.status === 'done' || !t.deadline) return false;
+  const deadline = new Date(t.deadline);
+  return !isNaN(deadline.getTime()) &&
+    deadline >= now &&
+    deadline <= new Date(now.getTime() + 7 * 86400000);
+}).length;
+
+const noDeadline = list.filter(t =>
+  t.status !== 'done' && !t.deadline
+).length;
 
       return {
-        total,
-        done,
-        open,
-        overdue,
-        rate: total ? Math.round(done / total * 100) : 0
-      };
+  total,
+  done,
+  open,
+  overdue,
+  dueSoon,
+  noDeadline,
+  rate: total ? Math.round(done / total * 100) : 0
+};
     };
 
     const renderDepartmentCard = (name, stats, extra = '', departmentId = '') => `
