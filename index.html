@@ -4866,6 +4866,8 @@ window.renderExecutiveOverview = function() {
 window.renderKPIBottlenecks = function() {
   const unfinishedEl = document.getElementById('bottleneck-unfinished');
   const overdueEl = document.getElementById('bottleneck-overdue');
+  const dueSoonEl = document.getElementById('bottleneck-due-soon');
+const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
   const statusEl = document.getElementById('bottleneck-status-list');
   const memberEl = document.getElementById('bottleneck-member-list');
   const oldestEl = document.getElementById('bottleneck-oldest-list');
@@ -4886,9 +4888,19 @@ window.renderKPIBottlenecks = function() {
   const overdueTasks = tasks.filter(t =>
     t.deadline && new Date(t.deadline) < now
   );
+  const dueSoonTasks = tasks.filter(t => {
+  if (!t.deadline) return false;
+  const deadline = new Date(t.deadline);
+  return deadline >= now &&
+    deadline <= new Date(now.getTime() + 7 * 86400000);
+});
+
+const noDeadlineTasks = tasks.filter(t => !t.deadline);
 
   unfinishedEl.innerText = tasks.length;
   overdueEl.innerText = overdueTasks.length;
+  if (dueSoonEl) dueSoonEl.innerText = dueSoonTasks.length;
+if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
 
   const todoCount = tasks.filter(t => t.status === 'todo').length;
   const progressCount = tasks.filter(t => t.status === 'in_progress').length;
