@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+8<!DOCTYPE html>
 <html lang="vi" class="light">
 <head>
   <meta charset="UTF-8">
@@ -4877,6 +4877,8 @@ const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
   if (!window.loggedInUser) {
     unfinishedEl.innerText = '0';
     overdueEl.innerText = '0';
+      if (dueSoonEl) dueSoonEl.innerText = '0';
+  if (noDeadlineEl) noDeadlineEl.innerText = '0';
     statusEl.innerHTML = '<p class="text-xs text-gray-400">Vui lòng đăng nhập.</p>';
     memberEl.innerHTML = '';
     oldestEl.innerHTML = '';
