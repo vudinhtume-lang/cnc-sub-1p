@@ -3475,7 +3475,7 @@ const memberStats = subMembers.map(m => {
           d.completed / maxValue * plotHeight;
 
         return `
-          <rect x="${center - 11}"
+          <rect data-trend-index="${i}" data-trend-type="created" x="${center - 11}" style="cursor:pointer"
             y="${yCount(d.created)}"
             width="10"
             height="${createdHeight}"
@@ -3484,7 +3484,7 @@ const memberStats = subMembers.map(m => {
             <title>Nhiệm vụ tạo mới: ${d.created}</title>
           </rect>
 
-          <rect x="${center + 1}"
+          <rect data-trend-index="${i}" data-trend-type="completed" x="${center + 1}" style="cursor:pointer"
             y="${yCount(d.completed)}"
             width="10"
             height="${completedHeight}"
@@ -3555,7 +3555,7 @@ const memberStats = subMembers.map(m => {
   return `C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x} ${y}`;
 }).join(' ');
       const rateDots = data.map((d, i) => `
-        <circle
+       <circle data-trend-index="${i}" data-trend-type="rate" style="cursor:pointer"
           cx="${xCenter(i)}"
           cy="${yRate(d.rate)}"
           r="3"
