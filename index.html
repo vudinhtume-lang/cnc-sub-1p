@@ -4891,19 +4891,17 @@ window.renderKPIBottlenecks = function() {
   const overdueEl = document.getElementById('bottleneck-overdue');
   const dueSoonEl = document.getElementById('bottleneck-due-soon');
 const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
-  const statusEl = document.getElementById('bottleneck-status-list');
   const memberEl = document.getElementById('bottleneck-member-list');
   const departmentEl = document.getElementById('bottleneck-department-list');
   const oldestEl = document.getElementById('bottleneck-oldest-list');
   const actionEl = document.getElementById('bottleneck-action-list');
 
-  if (!unfinishedEl || !statusEl || !memberEl || !departmentEl || !oldestEl || !actionEl) return;
+  if (!unfinishedEl || !memberEl || !departmentEl || !oldestEl || !actionEl) return;
   if (!window.loggedInUser) {
     unfinishedEl.innerText = '0';
     overdueEl.innerText = '0';
       if (dueSoonEl) dueSoonEl.innerText = '0';
   if (noDeadlineEl) noDeadlineEl.innerText = '0';
-    statusEl.innerHTML = '<p class="text-xs text-gray-400">Vui lòng đăng nhập.</p>';
     memberEl.innerHTML = '';
     departmentEl.innerHTML = '';
     oldestEl.innerHTML = '';
@@ -4970,32 +4968,6 @@ const departmentStats = departmentList.map(dept => {
   overdueEl.innerText = overdueTasks.length;
   if (dueSoonEl) dueSoonEl.innerText = dueSoonTasks.length;
 if (noDeadlineEl) noDeadlineEl.innerText = noDeadlineTasks.length;
-
-  const todoCount = tasks.filter(t => t.status === 'todo').length;
-  const progressCount = tasks.filter(t => t.status === 'in_progress').length;
-
-  statusEl.innerHTML = `
-  <div class="flex justify-between text-xs">
-    <span>🔴 Quá hạn</span>
-    <strong class="text-rose-600">${overdueTasks.length}</strong>
-  </div>
-  <div class="flex justify-between text-xs">
-    <span>🟠 Sắp đến hạn</span>
-    <strong class="text-orange-600">${dueSoonTasks.length}</strong>
-  </div>
-  <div class="flex justify-between text-xs">
-    <span>⚪ Thiếu Deadline</span>
-    <strong class="text-gray-500">${noDeadlineTasks.length}</strong>
-  </div>
-  <div class="flex justify-between text-xs">
-    <span>Chưa làm</span>
-    <strong>${todoCount}</strong>
-  </div>
-  <div class="flex justify-between text-xs">
-    <span>Đang thực hiện</span>
-    <strong>${progressCount}</strong>
-  </div>
-`;
 
   const members = (window.members || []).filter(m => !m.isManager);
 departmentEl.innerHTML = departmentStats.map(d => `
