@@ -4015,6 +4015,18 @@ window.showReportSection = function(section) {
     btn.classList.toggle('text-white', isActive);
     btn.classList.toggle('text-gray-500', !isActive);
   });
+    // Căn biểu đồ sau khi tab Xu hướng đã hiển thị
+  if (section === 'trend') {
+    const trendScroll = document.getElementById('smart-trend-scroll');
+
+    if (trendScroll) {
+      const focusX = Number(trendScroll.dataset.focusX || 0);
+      trendScroll.scrollLeft = Math.max(
+        0,
+        focusX - trendScroll.clientWidth / 2
+      );
+    }
+    }
 };
 
 // Mặc định mở Tổng quan
