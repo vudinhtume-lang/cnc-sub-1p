@@ -2826,6 +2826,33 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
           task.createdAt || 'created'
         );
             }
+      // SMART NOTIFICATION: CẬP NHẬT QUAN TRỌNG
+if (
+  old &&
+  Number(task.updateVersion) > Number(old.updateVersion || 0) &&
+  (
+    task.assigneeId === window.loggedInUser.id ||
+    task.createdBy === window.loggedInUser.uid
+  )
+) {
+  const changes = Array.isArray(task.updateChanges)
+    ? task.updateChanges.join('\n')
+    : 'Thông tin nhiệm vụ đã được cập nhật';
+
+  const msg = [
+    task.title || 'Nhiệm vụ',
+    `Người cập nhật: ${task.updateBy || 'Quản lý'}`,
+    changes
+  ].join('\n');
+
+  saveSmartNotification(
+    'important_update',
+    'CNC SUB 1P - Nhiệm vụ có cập nhật mới',
+    msg,
+    task.id,
+    String(task.updateVersion)
+  );
+}
 // SMART NOTIFICATION: NHIỆM VỤ ĐÃ HOÀN THÀNH
 if (
   old &&
