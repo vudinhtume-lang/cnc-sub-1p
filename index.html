@@ -5054,6 +5054,48 @@ const memberDueSoon = memberTasks.filter(t => {
         </div>
       `).join('')
     : '<p class="text-xs text-gray-400">Không có nhiệm vụ tồn đọng.</p>';
+  const actionItems = [];
+
+if (overdueTasks.length > 0) {
+  actionItems.push({
+    level: 'urgent',
+    title: 'Ưu tiên xử lý nhiệm vụ quá hạn',
+    detail: `Có ${overdueTasks.length} nhiệm vụ quá hạn. Cần rà soát tiến độ và xác nhận người chịu trách nhiệm.`
+  });
+}
+
+const riskDept = departmentStats.find(d => d.overdue > 0);
+if (riskDept) {
+  actionItems.push({
+    level: 'urgent',
+    title: `Tập trung hỗ trợ ${riskDept.name}`,
+    detail: `Đây là bộ phận có rủi ro quá hạn cao nhất trong các bộ phận. Cần rà soát các nhiệm vụ tồn đọng.`
+  });
+}
+
+if (dueSoonTasks.length > 0) {
+  actionItems.push({
+    level: 'warning',
+    title: 'Theo dõi nhiệm vụ sắp đến hạn',
+    detail: `Có ${dueSoonTasks.length} nhiệm vụ đến hạn trong 7 ngày tới. Cần kiểm tra khả năng hoàn thành đúng kế hoạch.`
+  });
+}
+
+if (noDeadlineTasks.length > 0) {
+  actionItems.push({
+    level: 'warning',
+    title: 'Bổ sung Deadline còn thiếu',
+    detail: `Có ${noDeadlineTasks.length} nhiệm vụ chưa có thời hạn. Cần xác nhận và cập nhật Deadline.`
+  });
+}
+
+if (memberStats.length && memberStats[0].overdue > 0) {
+  actionItems.push({
+    level: 'warning',
+    title: 'Hỗ trợ nhân viên có nhiệm vụ quá hạn',
+    detail: `${memberStats[0].name} đang có ${memberStats[0].overdue} nhiệm vụ quá hạn. Cần kiểm tra khó khăn và nhu cầu hỗ trợ.`
+  });
+}
 
   const oldestTasks = tasks
     .filter(t => t.createdAt)
