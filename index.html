@@ -1602,16 +1602,47 @@ if (orgLevel !== 'LEADER') {
 
     
 <!-- TAB 4: SMART REMINDERS -->
+
 <section id="view-reminders" class="hidden space-y-4">
 
-  <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-4 text-white shadow-md">
+  <!-- SMART NOTI HEADER -->
+  <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-4 text-white shadow-md">
     <h3 class="font-bold text-base flex items-center gap-2">
-      <i class="fa-solid fa-bell"></i> Trung tâm nhắc việc
+      <i class="fa-solid fa-bell"></i> SMART NOTI
     </h3>
     <p class="text-xs opacity-90 mt-1">
-      Theo dõi công việc cần xác nhận, sắp đến hạn và đã quá hạn.
+      Trung tâm thông báo nhiệm vụ và cảnh báo quản trị.
+    </p>
+    <p class="text-[10px] opacity-75 mt-1">
+      Realtime khi ứng dụng đang hoạt động và có kết nối mạng.
     </p>
   </div>
+
+  <!-- NOTIFICATION CENTER -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl p-3 border border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between gap-2">
+      <div>
+        <p class="text-xs font-bold text-gray-900 dark:text-white">
+          Hộp thư thông báo
+        </p>
+        <p class="text-[10px] text-gray-500 mt-0.5">
+          Các sự kiện và cảnh báo dành cho anh
+        </p>
+      </div>
+      <span id="smart-noti-unread-count"
+        class="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-50 text-blue-700">
+        0 chưa đọc
+      </span>
+    </div>
+
+    <div id="smart-noti-list" class="mt-3 space-y-2">
+      <div class="text-center py-5 text-xs text-gray-400">
+        <i class="fa-regular fa-bell-slash text-xl mb-2 block"></i>
+        Chưa có thông báo mới.
+      </div>
+    </div>
+  </div>
+</section>
 
   <div class="grid grid-cols-2 gap-2.5">
     <div class="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 rounded-xl p-3">
@@ -2247,7 +2278,7 @@ if (orgLevel !== 'LEADER') {
 
       <button onclick="switchTab('reminders')" id="nav-btn-reminders" class="nav-btn flex flex-col items-center py-1 rounded-xl text-gray-500 dark:text-gray-400 relative">
         <i class="fa-regular fa-bell text-base mb-0.5"></i>
-        <span class="text-[10px] font-semibold">Nhắc nhở</span>
+        <span class="text-[10px] font-semibold">NOTI</span>
         <span id="nav-reminder-badge" class="hidden absolute top-0.5 right-4 w-2 h-2 rounded-full bg-rose-500"></span>
       </button>
      <button onclick="switchTab('reports')" id="nav-btn-reports"
