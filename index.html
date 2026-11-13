@@ -3515,7 +3515,156 @@ const memberStats = subMembers.map(m => {
   const completionRate = total > 0
     ? Math.round(doneTasks.length / total * 100)
     : 0;
+  // V16.1 - SMART TREND KPI
+  const smartTotalEl = document.getElementById('smart-trend-total');
+  const smartCompletionEl = document.getElementById('smart-trend-completion');
+  const smartOverdueEl = document.getElementById('smart-trend-overdue');
+  const smartOntimeEl = document.getElementById('smart-trend-ontime');
 
+  const smartProgressLabel = document.getElementById('smart-trend-progress-label');
+  const smartProgressBar = document.getElementById('smart-trend-progress-bar');
+
+  const smartTotalChange = document.getElementById('smart-trend-total-change');
+  const smartCompletionChange = document.getElementById('smart-trend-completion-change');
+  const smartOverdueChange = document.getElementById('smart-trend-overdue-change');
+  const smartOntimeChange = document.getElementById('smart-trend-ontime-change');
+
+  const onTimeRate = doneTasks.length
+    ? Math.round(onTime / doneTasks.length * 100)
+    : 0;
+
+  // Xác định kỳ so sánh trước đó
+  let smartPreviousStart = null;
+  let smartPreviousEnd = null;
+
+  if (period === 'month' || period === 'last_month') {
+    smartPreviousStart = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() - 1,
+      1
+    );
+    smartPreviousEnd = new Date(startDate);
+
+  } else if (period === 'quarter') {
+    smartPreviousStart = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() - 3,
+      1
+    );
+    smartPreviousEnd = new Date(startDate);
+
+  } else if (period === 'year') {
+    smartPreviousStart = new Date(
+      startDate.getFullYear() - 1,
+      0,
+      1
+    );
+    smartPreviousEnd = new Date(startDate);
+  }
+
+  const smartPreviousTasks = smartPreviousStart
+    ? (window.tasks || []).filter(t => {
+        if (!t.createdAt) return false;
+        const date = new Date(t.createdAt);
+        return date >= smartPreviousStart && date < smartPreviousEnd;
+      })
+    : [];
+
+  const smartPreviousDone = smartPreviousTasks.filter(
+    t => t.status === 'done'
+  );
+
+  const smartPreviousOnTime = smartPreviousDone.filter(t =>
+    t.completedAt &&
+    t.deadline &&
+    new Date(t.completedAt) <= new Date(t.deadline)
+  ).length;
+
+  const smartPreviousOverdue = smartPreviousTasks.filter(t =>
+    t.status !== 'done' &&
+    t.deadline &&
+    new Date(t.deadline) < now
+  ).length;
+
+  const smartPreviousCompletionRate = smartPreviousTasks.length
+    ? Math.round(smartPreviousDone.length / smartPreviousTasks.length * 100)
+    : 0;
+
+  const smartPreviousOntimeRate = smartPreviousDone.length
+    ? Math.round(smartPreviousOnTime / smartPreviousDone.length * 100)
+    : 0;
+
+  // Hiển thị mức thay đổi và màu sắc theo ý nghĩa KPI
+  const renderSmartChange = (element, current, previous, higherIsBetter) => {
+    if (!element) return;
+
+    if (!smartPreviousStart) {
+      element.innerText = 'Toàn thời gian · Không so sánh';
+      element.className = 'text-[10px] text-gray-500 mt-1';
+      return;
+    }
+
+    if (smartPreviousTasks.length === 0) {
+      element.innerText = 'Kỳ trước chưa có nhiệm vụ';
+      element.className = 'text-[10px] text-gray-500 mt-1';
+      return;
+    }
+
+    const delta = current - previous;
+    const arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+
+    const good = higherIsBetter === null
+      ? null
+      : (delta > 0 ? higherIsBetter : delta < 0 ? !higherIsBetter : null);
+
+    element.innerText =
+      `${arrow} ${Math.abs(delta)}${higherIsBetter === null ? '' : '%'} so với kỳ trước`;
+
+    element.className =
+      `text-[10px] mt-1 ${
+        good === true ? 'text-emerald-600' :
+        good === false ? 'text-rose-600' :
+        'text-gray-500'
+      }`;
+  };
+
+  if (smartTotalEl) smartTotalEl.innerText = total;
+  if (smartCompletionEl) smartCompletionEl.innerText = `${completionRate}%`;
+  if (smartOverdueEl) smartOverdueEl.innerText = overdue;
+  if (smartOntimeEl) smartOntimeEl.innerText = `${onTimeRate}%`;
+
+  if (smartProgressLabel) {
+    smartProgressLabel.innerText = `${completionRate}%`;
+  }
+
+  if (smartProgressBar) {
+    smartProgressBar.style.width = `${completionRate}%`;
+  }
+
+  renderSmartChange(
+    smartTotalChange, total, smartPreviousTasks.length, null
+  );
+
+  renderSmartChange(
+    smartCompletionChange,
+    completionRate,
+    smartPreviousCompletionRate,
+    true
+  );
+
+  renderSmartChange(
+    smartOverdueChange,
+    overdue,
+    smartPreviousOverdue,
+    false
+  );
+
+  renderSmartChange(
+    smartOntimeChange,
+    onTimeRate,
+    smartPreviousOntimeRate,
+    true
+  );
   totalEl.innerText = total;
   doneEl.innerText = doneTasks.length;
   onTimeEl.innerText = onTime;
