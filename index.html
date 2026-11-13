@@ -304,8 +304,12 @@ async function syncManagerScopes(users) {
     });
 
     safeNotify(title, body, notificationId);
-  } catch (error) {
+    } catch (error) {
     console.error('Lỗi lưu SMART NOTIFICATION:', error);
+    window.showToast(
+      'Lỗi lưu thông báo: ' + error.message,
+      'warning'
+    );
   }
     }
 window.markSmartNotificationRead = async function(id) {
