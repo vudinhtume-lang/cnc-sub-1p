@@ -4895,8 +4895,9 @@ const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
   const memberEl = document.getElementById('bottleneck-member-list');
   const departmentEl = document.getElementById('bottleneck-department-list');
   const oldestEl = document.getElementById('bottleneck-oldest-list');
+  const actionEl = document.getElementById('bottleneck-action-list');
 
-  if (!unfinishedEl || !statusEl || !memberEl || !departmentEl || !oldestEl) return;
+  if (!unfinishedEl || !statusEl || !memberEl || !departmentEl || !oldestEl || !actionEl) return;
   if (!window.loggedInUser) {
     unfinishedEl.innerText = '0';
     overdueEl.innerText = '0';
@@ -4906,6 +4907,7 @@ const noDeadlineEl = document.getElementById('bottleneck-no-deadline');
     memberEl.innerHTML = '';
     departmentEl.innerHTML = '';
     oldestEl.innerHTML = '';
+    actionEl.innerHTML = '';
     return;
   }
 
