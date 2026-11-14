@@ -1303,8 +1303,11 @@ if (orgLevel !== 'LEADER') {
       }
       try {
         const member = await loadProfile(user);
-        window.loggedInUser = member;
-        startDataListeners(member);
+
+if (auth.currentUser?.uid !== user.uid) return;
+
+window.loggedInUser = member;
+startDataListeners(member);
         renderManagedUsers();
         if (window.renderAll) window.renderAll();
       } catch (err) {
