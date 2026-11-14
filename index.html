@@ -1293,8 +1293,9 @@ if (orgLevel !== 'LEADER') {
     };
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        stopListeners();
+  stopListeners();
+
+  if (!user) {
         window.loggedInUser = null;
         window.tasks = [];
         window.members = [];
