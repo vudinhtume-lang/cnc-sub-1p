@@ -348,8 +348,9 @@ function startDataListeners(member) {
 
   window._cloudSnapshotInitialized = false;
   window._knownCloudTasks = new Map();
-  window._taskSnapshotSources = new Map();
-  window._taskUnsubscribers = [];
+window._taskSnapshotSources = new Map();
+window._initializedTaskSnapshotSources = new Set();
+window._taskUnsubscribers = [];
   window.smartNotifications = [];
 
   window._notificationUnsubscribe = onSnapshot(
@@ -480,6 +481,7 @@ const oldSources = Array.from(
 
 oldSources.forEach(source => {
   window.handleCloudTasksSnapshot([], source);
+  window._initializedTaskSnapshotSources?.delete(source);
 });
 
 const reportIds = directReports
@@ -2794,7 +2796,16 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
 
   const previous = window._knownCloudTasks || new Map();
 
-  window._taskSnapshotSources.set(
+if (!window._initializedTaskSnapshotSources) {
+  window._initializedTaskSnapshotSources = new Set();
+}
+
+const firstSnapshotForSource =
+  !window._initializedTaskSnapshotSources.has(source);
+
+window._initializedTaskSnapshotSources.add(source);
+
+window._taskSnapshotSources.set(
     source,
     new Map(cloudTasks.map(t => [String(t.id), t]))
   );
@@ -2840,10 +2851,11 @@ window.handleCloudTasksSnapshot = function(cloudTasks, source = 'all') {
       }
       
             if (
-        !old &&
-        task.assigneeId === window.loggedInUser.id &&
-        !task.acknowledged
-      ) {
+  !firstSnapshotForSource &&
+  !old &&
+  task.assigneeId === window.loggedInUser.id &&
+  !task.acknowledged
+) {
         const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'}`;
         window.showToast(msg, 'info');
 
