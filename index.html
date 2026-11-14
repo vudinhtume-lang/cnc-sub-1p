@@ -379,10 +379,12 @@ window._taskUnsubscribers = [];
   );
   function listenTasks(taskQuery, source) {
     const unsubscribe = onSnapshot(taskQuery, (snapshot) => {
-      const rows = snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }));
+      
+const rows = snapshot.docs.map(d => ({
+  ...d.data(),
+  id: d.id
+}));
+
 
       window.handleCloudTasksSnapshot(rows, source);
 
