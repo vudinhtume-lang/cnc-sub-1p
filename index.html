@@ -364,9 +364,11 @@ function startDataListeners(member) {
     error => {
       console.error('SMART NOTIFICATION:', error);
       window.showToast(
-        'Không tải được hộp thư thông báo: ' + error.message,
-        'warning'
-      );
+  'Lỗi thông báo: ' + error.message +
+  ' | Auth UID: ' + (auth.currentUser?.uid || 'null') +
+  ' | Member UID: ' + (member.uid || 'null'),
+  'warning'
+);
     }
   );
   function listenTasks(taskQuery, source) {
