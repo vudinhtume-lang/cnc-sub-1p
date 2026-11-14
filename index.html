@@ -278,7 +278,14 @@ async function syncManagerScopes(users) {
 
     async function saveSmartNotification(type, title, body, taskId, eventKey = '') {
   const uid = auth.currentUser?.uid;
-  if (!uid || !taskId) return;
+
+  if (!uid || !taskId) {
+    window.showToast(
+      `DEBUG: Thiếu UID hoặc Task ID`,
+      'warning'
+    );
+    return;
+  }
 
   const safePart = value =>
     String(value).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
@@ -292,7 +299,11 @@ async function syncManagerScopes(users) {
 
   try {
     const existing = await getDoc(notificationRef);
-    if (existing.exists()) return;
+
+    if (existing.exists()) {
+      window.showToast('DEBUG: Thông báo đã tồn tại.', 'info');
+      return;
+    }
 
     await setDoc(notificationRef, {
       type,
@@ -303,8 +314,10 @@ async function syncManagerScopes(users) {
       read: false
     });
 
+    window.showToast('DEBUG: Đã lưu thông báo vào Firestore.', 'success');
     safeNotify(title, body, notificationId);
-    } catch (error) {
+
+  } catch (error) {
     console.error('Lỗi lưu SMART NOTIFICATION:', error);
     window.showToast(
       'Lỗi lưu thông báo: ' + error.message,
