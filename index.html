@@ -339,6 +339,11 @@ window.markSmartNotificationRead = async function(id) {
   }
 };  
 function startDataListeners(member) {
+  if (!auth.currentUser?.uid || auth.currentUser.uid !== member?.uid) {
+    console.warn('SMART NOTIFICATION: UID không khớp, đã chặn khởi tạo listener.');
+    return;
+  }
+
   stopListeners();
 
   window._cloudSnapshotInitialized = false;
