@@ -2856,7 +2856,7 @@ window._taskSnapshotSources.set(
   task.assigneeId === window.loggedInUser.id &&
   !task.acknowledged
 ) {
-        const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'}`;
+        const msg = `Bạn được giao: ${task.title || 'Nhiệm vụ mới'} [${source} | ${task.id}]`;
         window.showToast(msg, 'info');
 
         saveSmartNotification(
