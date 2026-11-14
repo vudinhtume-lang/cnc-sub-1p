@@ -550,9 +550,7 @@ for (let i = 0; i < reportIds.length; i += 30) {
       try {
         const member = await loadProfile(credential.user);
         if (member.uid !== ADMIN_UID && member.role === 'ADMIN') throw new Error('Quyền Admin không hợp lệ.');
-        window.loggedInUser = member;
         window.members = member.isManager ? window.members : [member];
-        startDataListeners(member);
         return member;
       } catch (err) {
         await signOut(auth);
