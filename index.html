@@ -6869,7 +6869,7 @@ let changedFields = [];
   }
       } else {
         targetTask = {
-  id: 'task-' + Date.now(),
+  id: 'task-' + Date.now() + '-' + crypto.randomUUID(),
   createdBy: window.loggedInUser.uid,
   createdByName: window.loggedInUser.name || '',
   title,
