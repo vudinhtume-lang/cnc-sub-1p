@@ -385,8 +385,16 @@ const rows = snapshot.docs.map(d => ({
   id: d.id
 }));
 
+console.log('[TASK SNAPSHOT]', source,
+  snapshot.docs.map(d => ({
+    docId: d.id,
+    dataId: d.data().id,
+    title: d.data().title,
+    assigneeId: d.data().assigneeId
+  }))
+);
 
-      window.handleCloudTasksSnapshot(rows, source);
+window.handleCloudTasksSnapshot(rows, source);
 
 if (window.renderAll) window.renderAll();
 
