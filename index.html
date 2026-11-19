@@ -6658,21 +6658,41 @@ window.renderTaskUpdateNotifications = function() {
     };
 
     window.checkUnacknowledgedTasks = function() {
-      if (!window.loggedInUser || window.loggedInUser.isManager) return;
+  if (!window.loggedInUser || window.loggedInUser.isManager) return;
 
-      const unackTask = window.tasks.find(t => t.assigneeId === window.loggedInUser.id && !t.acknowledged && t.status !== 'done');
-      
-      if (unackTask) {
-        window.currentAckTask = unackTask;
-        document.getElementById('ack-task-title').innerText = unackTask.title;
-        document.getElementById('ack-task-desc').innerText = unackTask.desc || 'Không có mô tả chi tiết.';
-        document.getElementById('ack-task-deadline').innerText = formatDateTime(unackTask.deadline);
-        document.getElementById('ack-task-priority').innerText = unackTask.priority === 'high' ? '🔴 Cao' : (unackTask.priority === 'medium' ? '🟡 Trung bình' : '🟢 Thấp');
-        
-        document.getElementById('task-ack-modal').classList.remove('hidden');
-      }
-    }
+  const pendingTasks = (window.tasks || [])
+    .filter(t =>
+      t.assigneeId === window.loggedInUser.id &&
+      !t.acknowledged &&
+      t.status !== 'done'
+    )
+    .sort((a, b) =>
+      new Date(b.createdAt || 0).getTime() -
+      new Date(a.createdAt || 0).getTime()
+    );
 
+  const unackTask = pendingTasks[0];
+
+  if (!unackTask) return;
+
+  window.currentAckTask = unackTask;
+
+  document.getElementById('ack-task-title').innerText =
+    unackTask.title || 'Nhiệm vụ mới';
+
+  document.getElementById('ack-task-desc').innerText =
+    unackTask.desc || 'Không có mô tả chi tiết.';
+
+  document.getElementById('ack-task-deadline').innerText =
+    formatDateTime(unackTask.deadline);
+
+  document.getElementById('ack-task-priority').innerText =
+    unackTask.priority === 'high'
+      ? '🔴 Cao'
+      : (unackTask.priority === 'medium' ? '🟡 Trung bình' : '🟢 Thấp');
+
+  document.getElementById('task-ack-modal').classList.remove('hidden');
+};
     window.confirmTaskAcknowledgement = async function() {
   if (!window.currentAckTask) return;
 
